@@ -54,18 +54,18 @@ void drawshapes(SDL_Surface * screen, struct objnode *objroot,
 // draws a circle on the screen
 void drawcirc(SDL_Surface * screen, struct objnode *objx)
 {
-    cpVect pos, radi;
+    cpVect pos, radiusv;
 
     pos = cpBodyGetPos(objx->b);
     filledCircleColor(screen, SX(pos.x), SY(pos.y),
 		      SS(cpCircleShapeGetRadius(objx->s)), objx->c1);
     aacircleColor(screen, SX(pos.x), SY(pos.y),
 		  SS(cpCircleShapeGetRadius(objx->s)), objx->c2);
-    radi = cpvmult(cpvforangle(cpBodyGetAngle(objx->b)),
-		   cpCircleShapeGetRadius(objx->s));
+    radiusv = cpvmult(cpvforangle(cpBodyGetAngle(objx->b)),
+		      cpCircleShapeGetRadius(objx->s));
     aalineColor(screen,
-		SX(pos.x), SY(pos.y), SX(radi.x + pos.x),
-		SY(radi.y + pos.y), objx->c2);
+		SX(pos.x), SY(pos.y), SX(radiusv.x + pos.x),
+		SY(radiusv.y + pos.y), objx->c2);
 }
 
 // draws a line segment
