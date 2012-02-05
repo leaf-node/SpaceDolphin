@@ -6,11 +6,18 @@ physics engine, which is under a permissive license.
 
 SDL and cairo need to be installed to build and run this game. This command
 will install those libraries for you in an apt-based packaging system, used by
-many distros of GNU/Linux:
+many distros of GNU/Linux: (Pacakge names may be different in newer/older
+systems.)
 
     sudo apt-get install libsdl1.2debian libsdl1.2-dev libcairo2 libcairo2-dev
 
-(Pacakge names may be different in newer/older distros.) Execute make:
+You will also need to have the dynamic library for Chipmunk installed. I
+recommend Chipmunk 6.0.3 or later. You do not need to build the demos included
+with Chipmunk.
+
+    http://chipmunk-physics.net/release/ChipmunkLatest.tgz
+
+Once that is installed, come back here and execute make:
 
     make
 
