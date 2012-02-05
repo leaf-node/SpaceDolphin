@@ -17,106 +17,164 @@
 
 #include "spacedolphin.h"
 
-void drawcirc(SDL_Surface * screen, struct objnode *objx);
-void drawlseg(SDL_Surface * screen, struct objnode *objx);
-void drawpoly(SDL_Surface * screen, struct objnode *objx);
-void drawfps(SDL_Surface * screen, long simtime);
+void drawcirc(cairo_t * cr, struct objnode *objx);
+void drawlseg(cairo_t * cr, struct objnode *objx);
+void drawpoly(cairo_t * cr, struct objnode *objx);
+void drawfps(cairo_t * cr, long simtime);
+void cairoerase(cairo_t * cr);
 
 
 // draw every shape in the link list connected to objroot
-void drawshapes(SDL_Surface * screen, struct objnode *objroot,
-		long simtime)
+void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot, long simtime)
 {
     struct objnode *objx = objroot;
 
-    SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+    cairoerase(cr);
     while ((objx = objx->next)) {
 	switch (objx->kind) {
 	case S_CIRC:
-	    drawcirc(screen, objx);
+	    drawcirc(cr, objx);
 	    break;
 	case S_LSEG:
-	    drawlseg(screen, objx);
+	    drawlseg(cr, objx);
 	    break;
 	case S_POLY:
-	    drawpoly(screen, objx);
+	    drawpoly(cr, objx);
 	    break;
 	}
     }
 #if SHOWFPS
-    drawfps(screen, simtime);
+    drawfps(cr, simtime);
 #endif
 
+    SDL_BlitSurface(sdlbuff, NULL, screen, NULL);
     SDL_Flip(screen);
 
 }
 
-// draws a circle on the screen
-void drawcirc(SDL_Surface * screen, struct objnode *objx)
+// draws a circle on the cairo surface
+void drawcirc(cairo_t * cr, struct objnode *objx)
 {
+    cpFloat radius;
     cpVect pos, radiusv;
 
     pos = cpBodyGetPos(objx->b);
-    filledCircleColor(screen, SX(pos.x), SY(pos.y),
-		      SS(cpCircleShapeGetRadius(objx->s)), objx->c1);
-    aacircleColor(screen, SX(pos.x), SY(pos.y),
-		  SS(cpCircleShapeGetRadius(objx->s)), objx->c2);
+    radius = cpCircleShapeGetRadius(objx->s);
     radiusv = cpvmult(cpvforangle(cpBodyGetAngle(objx->b)),
 		      cpCircleShapeGetRadius(objx->s));
-    aalineColor(screen,
-		SX(pos.x), SY(pos.y), SX(radiusv.x + pos.x),
-		SY(radiusv.y + pos.y), objx->c2);
+
+    cairo_arc(cr, pos.x, pos.y, radius, 0, 2 * M_PI);
+
+    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
+			  objx->c1.a);
+    cairo_fill_preserve(cr);
+
+    cairo_set_line_width(cr, 0.25);
+    cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
+			  objx->c2.a);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, pos.x, pos.y);
+    cairo_rel_line_to(cr, radiusv.x, radiusv.y);
+    cairo_stroke(cr);
+
 }
 
 // draws a line segment
-void drawlseg(SDL_Surface * screen, struct objnode *objx)
+void drawlseg(cairo_t * cr, struct objnode *objx)
 {
     cpVect enda, endb;
 
     enda = cpSegmentShapeGetA(objx->s);
     endb = cpSegmentShapeGetB(objx->s);
-    aalineColor(screen, SX(enda.x), SY(enda.y), SX(endb.x), SY(endb.y),
-		objx->c1);
+
+    cairo_move_to(cr, enda.x, enda.y);
+    cairo_line_to(cr, endb.x, endb.y);
+
+    cairo_set_line_width(cr, 0.25);
+    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
+			  objx->c1.a);
+    cairo_stroke(cr);
+
 }
 
 // draws a polygon
-void drawpoly(SDL_Surface * screen, struct objnode *objx)
+void drawpoly(cairo_t * cr, struct objnode *objx)
 {
     int i, numv;
     cpVect pos, rotv, vert;
-    Sint16 xverts[4], yverts[4];
 
     pos = cpBodyGetPos(objx->b);
     rotv = cpBodyGetRot(objx->b);
     numv = cpPolyShapeGetNumVerts(objx->s);
+
     for (i = 0; i < numv; i++) {
 	vert =
 	    cpvadd(pos, cpvrotate(cpPolyShapeGetVert(objx->s, i), rotv));
-	xverts[i] = SX(vert.x);
-	yverts[i] = SY(vert.y);
+
+	if (i == 0)
+	    cairo_move_to(cr, vert.x, vert.y);
+	else
+	    cairo_line_to(cr, vert.x, vert.y);
     }
-    filledPolygonColor(screen, xverts, yverts, numv, objx->c1);
-    aapolygonColor(screen, xverts, yverts, numv, objx->c2);
+
+    cairo_close_path(cr);
+
+    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
+			  objx->c1.a);
+    cairo_fill_preserve(cr);
+
+    cairo_set_line_width(cr, 0.25);
+    cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
+			  objx->c2.a);
+    cairo_stroke(cr);
+
 }
 
-// draws frames per second on screen (converts from simulation time)
-void drawfps(SDL_Surface * screen, long simtime)
+// draws frames per second on surface (converts from simulation time)
+void drawfps(cairo_t * cr, long simtime)
 {
     int fps;
     double simrate;
+    //cairo_text_extents_t te;
+
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_set_font_size(cr, 3.5);
 
     framerate(simtime, &simrate, &fps);
+
     if (fps >= 0) {
 	char s[100];
 	sprintf(s, "Framerate: %3d fps", fps);
-	stringColor(screen, 10, 10, s, 0xFFFFFFFF);
+	//   cairo_text_extents(cr, s, &te);
+	cairo_scale(cr, 1.0, -1.0);
+	cairo_move_to(cr, -77, -114);
+	cairo_show_text(cr, s);
 	sprintf(s, "Simulation rate: %1.2lfx", simrate);
-	stringColor(screen, 10, 20, s, 0xFFFFFFFF);
+	cairo_move_to(cr, -77, -110);
+	cairo_show_text(cr, s);
+	cairo_scale(cr, 1.0, -1.0);
     }
+
 }
 
+// erases the surface used by cairo
+void cairoerase(cairo_t * cr)
+{
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_move_to(cr, -80, 0);
+    cairo_line_to(cr, 80, 0);
+    cairo_line_to(cr, 80, 120);
+    cairo_line_to(cr, -80, 120);
+    cairo_close_path(cr);
+    cairo_fill(cr);
+}
+
+
 // creates a screen to draw on
-void graphicsinit(SDL_Surface ** screen)
+void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
+		  cairo_surface_t ** surface, cairo_t ** cr)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 	printf("Unable to initialize SDL: %s\n", SDL_GetError());
@@ -124,9 +182,25 @@ void graphicsinit(SDL_Surface ** screen)
     }
     atexit(SDL_Quit);
 
-    *screen = SDL_SetVideoMode(640, 480, 16, SDL_DOUBLEBUF);
+    *screen = SDL_SetVideoMode(640, 480, 32, 0x0);
+    *sdlbuff = SDL_CreateRGBSurface(0, 640, 480, 32,
+				    0x00FF0000, 0x0000FF00, 0x000000FF,
+				    0x0);
     if (*screen == NULL) {
 	printf("Unable to set video mode: %s\n", SDL_GetError());
 	exit(1);
     }
+
+    *surface =
+	cairo_image_surface_create_for_data((*sdlbuff)->pixels,
+					    CAIRO_FORMAT_RGB24,
+					    (*sdlbuff)->w, (*sdlbuff)->h,
+					    (*sdlbuff)->pitch);
+
+    *cr = cairo_create(*surface);
+
+    cairo_scale(*cr, 4.0, -4.0);
+    cairo_translate(*cr, 79.875, -119.875);
+
 }
+

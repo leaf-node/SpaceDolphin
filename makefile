@@ -3,8 +3,8 @@ NAME= spacedolphin
 CC=gcc
 CFLAGS=-Wall
 
-INCL=-I$(IDIR) -I/usr/local/include/chipmunk
-LIBS=-lm -lchipmunk -lSDL -lSDL_gfx
+INCL=-I$(IDIR) -I/usr/local/include/chipmunk -I/usr/include/cairo
+LIBS=-lm -lchipmunk -lSDL -lcairo
 STATIC=
 
 IDIR =.

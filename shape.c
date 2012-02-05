@@ -27,6 +27,7 @@ struct objnode *makenode(struct objnode *objx);
 void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randv(struct objnode *objlast, cpVect p1, cpVect p2, cpFloat width);
 bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
+struct color_rgba setcolor(float r, float g, float b, float a);
 
 struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
 			 cpFloat mass, cpFloat radius, cpVect pos);
@@ -70,7 +71,7 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(-40, 20));
-    objx->c1 = 0x8800FFFF;
+    objx->c1 = setcolor(0.5, 0, 1, 1);
 
     objx = makebhole(objx, space, 1, 5, cpv(20, 70));
     cpShapeSetLayers(objx->s, BHOLE);
@@ -114,8 +115,8 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     cpBodySetAngVel(objx->b, 20);
     cpShapeSetFriction(objx->s, 0.7);
     cpShapeSetElasticity(objx->s, 0.7f);
-    objx->c1 = 0x0000FFFF;
-    objx->c2 = 0x888888FF;
+    objx->c1 = setcolor(0, 0, 1, 1);
+    objx->c2 = setcolor(0.5, 0.5, 0.5, 1);
 
     return objx;
 }
@@ -149,8 +150,8 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 
     cpShapeSetFriction(objx->s, 0.7f);
     cpShapeSetElasticity(objx->s, 0.4f);
-    objx->c1 = 0x00FF00FF;
-    objx->c2 = 0xFF0000FF;
+    objx->c1 = setcolor(0, 1, 0, 1);
+    objx->c2 = setcolor(1, 0, 0, 1);
 
     return objx;
 }
@@ -174,8 +175,8 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
 
     cpShapeSetFriction(objx->s, 1);
     cpShapeSetElasticity(objx->s, 0.7f);
-    objx->c1 = 0xFF0000FF;
-    objx->c2 = 0xFF00FFFF;
+    objx->c1 = setcolor(1, 0, 0, 1);
+    objx->c2 = setcolor(1, 0, 1, 1);
 
     return objx;
 }
@@ -192,8 +193,8 @@ struct objnode *makefloat(struct objnode *objx, cpSpace * space,
     cpShapeSetGroup(objx->s, FLOATG);
 
     cpBodySetAngVel(objx->b, 2);
-    objx->c1 = 0xFF8800AA;
-    objx->c2 = 0xFF0000AA;
+    objx->c1 = setcolor(1, 0.5, 0, 0.625);
+    objx->c2 = setcolor(1, 0, 0, 0.625);
 
     return objx;
 }
@@ -210,8 +211,8 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 
     cpBodySetVelLimit(objx->b, 0);
     cpBodySetAngVel(objx->b, 10);
-    objx->c1 = 0x22222288;
-    objx->c2 = 0xFFFFFF88;
+    objx->c1 = setcolor(0.125, 0.125, 0.125, 0.5);
+    objx->c2 = setcolor(1, 1, 1, 0.5);
 
     return objx;
 }
@@ -248,6 +249,19 @@ struct objnode *makerect(struct objnode *objx, cpSpace * space,
     verts[3] = cpv(hw, -hw);
 
     return makepoly(objx, space, false, mass, 4, verts, pos);
+}
+
+// returns a structure to store an object's color
+struct color_rgba setcolor(float r, float g, float b, float a)
+{
+    struct color_rgba color;
+
+    color.r = r;
+    color.g = g;
+    color.b = b;
+    color.a = a;
+
+    return color;
 }
 
 // picks a random spot to place an object, then calls nearobjs() to test it.
@@ -326,8 +340,8 @@ struct objnode *makenode(struct objnode *objx)
     objnew->b = NULL;
     objnew->s = NULL;
     objnew->width = 0;
-    objnew->c1 = 0x000000FF;
-    objnew->c2 = 0xFFFFFFFF;
+    objnew->c1 = setcolor(0, 0, 0, 1);
+    objnew->c2 = setcolor(1, 1, 1, 1);
 
     return objnew;
 }

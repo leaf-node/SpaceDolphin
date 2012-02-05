@@ -21,10 +21,14 @@
 #include <math.h>
 #include <time.h>
 #include <SDL/SDL.h>
-#include <SDL/SDL_gfxPrimitives.h>
+#include <cairo.h>
 #include <chipmunk.h>
 
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
+
+struct color_rgba {
+    float r, g, b, a;
+};
 
 // linked list node to keep track of objects for drawing and querying
 struct objnode {
@@ -33,8 +37,8 @@ struct objnode {
     cpBody *b;
     cpShape *s;
     cpFloat width;
-    Uint32 c1;
-    Uint32 c2;
+    struct color_rgba c1;
+    struct color_rgba c2;
     struct objnode *prev;
     struct objnode *next;
 };
@@ -78,9 +82,10 @@ struct objnode {
 #define PI   3.1415926535
 
 // draw.c
-void graphicsinit(SDL_Surface ** screen);
-void drawshapes(SDL_Surface * screen, struct objnode *objroot,
-		long simtime);
+void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
+		  cairo_surface_t ** surface, cairo_t ** cr);
+void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot, long simtime);
 
 // shape.c
 cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);

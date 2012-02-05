@@ -18,16 +18,21 @@
 #include "spacedolphin.h"
 
 struct objnode objroot[1] =
-    { {S_NONE, false, NULL, NULL, 0, 0x0, 0x0, NULL, NULL} };
+    { {S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, NULL,
+       NULL}
+};
 
 
 int main(void)
 {
-    SDL_Surface *screen;
+    SDL_Surface *screen, *sdlbuff;
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
     cpSpace *space;
     struct objnode *vehicle;
 
-    graphicsinit(&screen);
+    graphicsinit(&screen, &sdlbuff, &surface, &cr);
     space = makeshapes(objroot, &vehicle);
 
 
@@ -41,12 +46,13 @@ int main(void)
 	for (acc += simtime; acc > DT; acc -= DT, t += DT)
 	    cpSpaceStep(space, (double) DT / 1e9);
 
-	drawshapes(screen, objroot, simtime);
+	drawshapes(screen, sdlbuff, cr, objroot, simtime);
 
     }
 
     rmobjs(objroot);
     cpSpaceFree(space);
+    cairo_surface_destroy(surface);
 
     return 0;
 }
