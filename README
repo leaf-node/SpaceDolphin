@@ -1,0 +1,27 @@
+This is a simple little toy game released under GPLv3+. It uses the chipmunk
+physics engine, which is under a permissive license.
+
+
+-->  Build Instructions:
+
+SDL and SDL_gfx need to be installed to build and run this game. This command
+will install those libraries for you in an apt-based packaging system, used by
+many distros of GNU/Linux:
+
+    sudo apt-get install libsdl1.2debian libsdl1.2-dev libsdl-gfx1.2-4 libsdl-gfx1.2-dev
+
+(Pacakge names may be different in newer/older distros.) Execute make:
+
+    make
+
+To play the game, run this:
+
+    ./spacedolphin
+
+
+--> Game Instructions
+
+Control your flight with the arrow keys so that you can knock objects around
+the screen. Go nuts with it.
+
+
