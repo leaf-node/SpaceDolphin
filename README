@@ -2,6 +2,11 @@ This is a simple little toy game released under GPLv3+. It uses the chipmunk
 physics engine, which is under a permissive license.
 
 
+**This is not the master branch.**
+You probably want to use that one instead because it uses a faster graphics
+library. This branch uses cairo, which draws slightly prettier graphcs.
+
+
 -->  Build Instructions:
 
 SDL and cairo need to be installed to build and run this game. This command
