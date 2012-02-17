@@ -1,7 +1,7 @@
 NAME= spacedolphin
 
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-O3 -Wall
 
 INCL=-I$(IDIR) -I/usr/local/include/chipmunk
 LIBS=-lm -lchipmunk -lSDL -lSDL_gfx
