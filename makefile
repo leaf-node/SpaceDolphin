@@ -16,18 +16,18 @@ _OBJ = main.o shape.o draw.o move.o time.o
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-.PHONY: all debug
+.PHONY: all
 
-all: $(ODIR) $(NAME) 
+all: $(NAME)
+
+$(NAME): $(ODIR) $(OBJ)
+	gcc -g $(CFLAGS) $(LIBS) $(STATIC) $(OBJ) -o $@
 
 $(ODIR):
 	mkdir -p $(ODIR)
 
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -g -c $(CFLAGS) $(INCL) -o $@ $<
-
-$(NAME): $(OBJ)
-	gcc -g $(CFLAGS) $(LIBS) $(STATIC) $^ -o $@
 
 .PHONY: strip clean unstrip
 
