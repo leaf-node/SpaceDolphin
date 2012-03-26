@@ -1,25 +1,24 @@
-This is a simple little toy game released under GPLv3+. It uses the chipmunk
-physics engine, which is under a permissive license.
+This is a simple little toy game released under GPLv3+. It uses the Chipmunk
+Physics engine, which is under a permissive license.
 
 
 -->  Build Instructions:
 
-SDL and SDL_gfx need to be installed to build and run this game. This command
-will install those libraries for you in an apt-based packaging system, used by
-many distros of GNU/Linux: (Pacakge names may be different in newer/older
-systems.)
+SDL, SDL_gfx and cmake need to be installed to build and run this game. The
+following command will install these packages for you in an apt-based packaging
+system, used by many distros of GNU/Linux: (Pacakge names may be different in
+newer/older systems.)
 
-    sudo apt-get install build-essential libsdl1.2debian libsdl1.2-dev libsdl-gfx1.2-4 libsdl-gfx1.2-dev
+    sudo apt-get install build-essential cmake libsdl1.2debian libsdl1.2-dev libsdl-gfx1.2-4 libsdl-gfx1.2-dev
 
-You will also need to have the dynamic library for Chipmunk installed. I
-recommend Chipmunk 6.0.3 or later. You do not need to build the demos included
-with Chipmunk.
-
-    http://chipmunk-physics.net/release/ChipmunkLatest.tgz
-
-Once that is installed, come back here and execute make:
+To build the game, run:
 
     make
+
+It should automatically download and build the Chipmunk Physics library, so you
+no longer have to go out of your way to install it manually. Of course, you'll
+need an internet connection (or to copy the "ChipmunkLatest.tgz" file into the
+"dl" subdirectory) to proceed.
 
 To play the game, run this:
 
