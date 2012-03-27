@@ -57,27 +57,27 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     cpSpaceSetGravity(space, gravity);
 
 
-    objx = makeline(objx, space, true, cpv(-80, 11), cpv(-20, 11));
-    objx = makeline(objx, space, true, cpv(-20, 11), cpv(21, 0.5));
-    objx = makeline(objx, space, true, cpv(19, 1), cpv(80, 1));
+    objx = makeline(objx, space, true, cpv(0, 11), cpv(60, 11));
+    objx = makeline(objx, space, true, cpv(60, 11), cpv(101, 0.5));
+    objx = makeline(objx, space, true, cpv(99, 1), cpv(160, 1));
 
-    objx = makeline(objx, space, true, cpv(-80, 119), cpv(80, 119));
-    objx = makeline(objx, space, true, cpv(-79, 120), cpv(-79, 10));
-    objx = makeline(objx, space, true, cpv(79, 120), cpv(79, 0));
-    objx = makecirc(objx, space, false, 1.0, 10, cpv(40, 57));
-    objx = makecirc(objx, space, false, 0.36, 3, cpv(40, 45));
+    objx = makeline(objx, space, true, cpv(0, 119), cpv(160, 119));
+    objx = makeline(objx, space, true, cpv(1, 120), cpv(1, 10));
+    objx = makeline(objx, space, true, cpv(159, 120), cpv(159, 0));
+    objx = makecirc(objx, space, false, 1.0, 10, cpv(120, 57));
+    objx = makecirc(objx, space, false, 0.36, 3, cpv(120, 45));
 
 
     // the "vehicle" is the object that is controlled by the keyboard
-    objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(-40, 20));
+    objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
     objx->c1 = 0x8800FFFF;
 
-    objx = makebhole(objx, space, 1, 5, cpv(20, 70));
+    objx = makebhole(objx, space, 1, 5, cpv(100, 70));
     cpShapeSetLayers(objx->s, BHOLE);
-    objx = makebhole(objx, space, 1, 5, cpv(-40, 80));
+    objx = makebhole(objx, space, 1, 5, cpv(40, 80));
     cpShapeSetLayers(objx->s, BHOLE);
 
-    objx = makerect(objx, space, 0.25, 8, cpv(0, 20));
+    objx = makerect(objx, space, 0.25, 8, cpv(80, 20));
 
 
     srandom(curns());

@@ -52,9 +52,9 @@ struct objnode {
 #define NITER    30		// number of frames to average, to calc actual fps
 #define SHOWFPS  true		// show the fps if true
 
-#define SS(s) (4* (s))		// scaling factor for display
-#define SX(x) (320 + SS(x))	// slide the coordinates
-#define SY(y) (480 - SS(y))	// flip and slide the coordinates
+#define SS(s) (4 * (s))		// scaling factor for display
+#define SX(x) (SS(x))		// scale the coordinates
+#define SY(y) (480 - SS(y))	// scale and slide the coordinates
 
 #define FORCE       800.0	// force of rocket's jetpack
 #define TFORCE      400.0	// proportional to torque of rocket
@@ -65,15 +65,15 @@ struct objnode {
 #define VGRAV	    -75.0	// upwards gravity (so negative means down)
 #define BGRAV      1000.0	// gravity towards any black holes
 
-#define XMAX         80.0
-#define XMIN        -80.0
+#define XMAX        160.0
+#define XMIN          0.0
 #define YMAX        120.0
 #define YMIN          0.0
 #define XYBUF        20.0
 
 #define randfit(objx, r) \
-    randv(objx, cpv(XMIN + XYBUF, YMIN + XYBUF), \
-	    cpv(XMAX - XYBUF, YMAX - XYBUF), r)
+    (randv((objx), cpv(XMIN + XYBUF, YMIN + XYBUF), \
+	    cpv(XMAX - XYBUF, YMAX - XYBUF), (r)))
 
 #define PI   3.1415926535
 
