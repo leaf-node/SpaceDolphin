@@ -34,9 +34,10 @@ $(ODIR)/%.o: %.c $(DEPS) $(STATIC)
 
 
 dl/ChipmunkLatest.tgz:
-	@echo "\n\n Downloading Chipmunk Physics... \n\n"
+	@echo "\n Downloading Chipmunk Physics... \n"
 	mkdir -p dl
 	curl -# http://chipmunk-physics.net/release/ChipmunkLatest.tgz > dl/ChipmunkLatest.tgz
+	@echo ""
 
 dl/chipmunk: dl/ChipmunkLatest.tgz
 	tar xzf dl/ChipmunkLatest.tgz
@@ -45,6 +46,7 @@ dl/chipmunk: dl/ChipmunkLatest.tgz
 $(STATIC): dl/chipmunk
 	cd dl/chipmunk && cmake .
 	make -C dl/chipmunk chipmunk_static
+	@echo ""
 
 
 
