@@ -15,12 +15,13 @@ cairo, which draws *slightly* prettier graphcs.
 
 ### Build Instructions:
 
-**SDL**, **cairo** and **cmake** need to be installed to build and run this
-game. The following command will install these packages for you in an apt-based
-packaging system, used by many distros of [GNU/Linux](http://www.gnu.org/):
-(Pacakge names may be different in newer/older systems.)
+**SDL**, **cairo**, **curl**, and **cmake** need to be installed to build and
+run this game. The following command will install these packages for you in an
+apt-based packaging system, used by many distros of
+[GNU/Linux](http://www.gnu.org/): (Pacakge names may be different in
+newer/older systems.)
 
-    sudo apt-get install build-essential cmake libsdl1.2debian libsdl1.2-dev libcairo2 libcario2-dev
+    sudo apt-get install build-essential curl cmake libsdl1.2debian libsdl1.2-dev libcairo2 libcario2-dev
 
 To build the game, run:
 
