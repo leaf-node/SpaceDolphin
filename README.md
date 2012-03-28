@@ -22,11 +22,12 @@ newer/older systems.)
 
 To build the game, run:
 
+    make clean
     make
 
-It should automatically download and build the Chipmunk Physics library, so you
-no longer have to go out of your way to install it manually. Of course, you'll
-need an internet connection (or to copy the
+It should automatically download, build and use the Chipmunk Physics library,
+so you no longer have to go out of your way to install it manually. Of course,
+you'll need an internet connection (or to copy the
 "[ChipmunkLatest.tgz](http://chipmunk-physics.net/release/ChipmunkLatest.tgz)"
 file into the "dl" subdirectory) to proceed.
 
@@ -38,6 +39,6 @@ To play the game, run this:
     ./spacedolphin
 
 Control your flight with the arrow keys so that you can knock objects around
-the screen. Go nuts with it.
+the screen. Go nuts with it! :)
 
 
