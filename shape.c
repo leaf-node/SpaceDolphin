@@ -57,16 +57,18 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     cpSpaceSetGravity(space, gravity);
 
 
-    objx = makeline(objx, space, true, cpv(0, 11), cpv(60, 11));
-    objx = makeline(objx, space, true, cpv(60, 11), cpv(101, 0.5));
-    objx = makeline(objx, space, true, cpv(99, 1), cpv(160, 1));
+    cpVect fwedgeverts[4] = {cpv(-1,-1), cpv(-1,11), cpv(60,11), cpv(108,-1)};
+    objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
+    objx->c1 = 0x00000000; //transparent body
 
+    objx = makeline(objx, space, true, cpv(99, 1), cpv(160, 1));
     objx = makeline(objx, space, true, cpv(0, 119), cpv(160, 119));
     objx = makeline(objx, space, true, cpv(1, 120), cpv(1, 10));
     objx = makeline(objx, space, true, cpv(159, 120), cpv(159, 0));
+
+
     objx = makecirc(objx, space, false, 1.0, 10, cpv(120, 57));
     objx = makecirc(objx, space, false, 0.36, 3, cpv(120, 45));
-
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
@@ -97,8 +99,10 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     objx = makenode(objx);
     objx->kind = S_CIRC;
 
-    if (statb)
+    if (statb) {
 	objx->s = cpCircleShapeNew(space->staticBody, radius, cpvzero);
+	objx->b = space->staticBody;
+    }
     else {
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	objx->b = cpBodyNew(mass, moment);
@@ -106,7 +110,9 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     }
 
     insertobj(space, objx);
-    cpBodySetPos(objx->b, pos);
+    if (!statb)
+	cpBodySetPos(objx->b, pos);
+
     objx->width = radius;
 
     cpShapeSetLayers(objx->s, NONBH);
@@ -128,9 +134,11 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
     objx = makenode(objx);
     objx->kind = S_POLY;
 
-    if (statb)
+    if (statb) {
 	objx->s =
 	    cpPolyShapeNew(space->staticBody, nverts, verts, cpvzero);
+	objx->b = space->staticBody;
+    }
     else {
 	cpFloat moment = cpMomentForPoly(mass, nverts, verts, cpvzero);
 	objx->b = cpBodyNew(mass, moment);
@@ -138,7 +146,8 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
     }
 
     insertobj(space, objx);
-    cpBodySetPos(objx->b, pos);
+    if (!statb)
+	cpBodySetPos(objx->b, pos);
 
     int i;
     for (i = 0; i < nverts; i++)
@@ -162,8 +171,10 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
     objx = makenode(objx);
     objx->kind = S_LSEG;
 
-    if (statb)
+    if (statb) {
 	objx->s = cpSegmentShapeNew(space->staticBody, v1, v2, 0);
+	objx->b = space->staticBody;
+    }
     else {
 	fprintf(stderr,
 		"Error, non-static line segments are not supported.\n");
@@ -202,8 +213,10 @@ struct objnode *makefloat(struct objnode *objx, cpSpace * space,
 struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 			  cpFloat mass, cpFloat radius, cpVect pos)
 {
+    // black holes aren't 'static', because we want them to rotate
     objx = makecirc(objx, space, false, mass, radius, pos);
 
+    // ...but they should not change their 0 velocity:
     objx->b->velocity_func = &dontfall;
     objx->bhole = true;
     cpShapeSetGroup(objx->s, FLOATG);
@@ -335,7 +348,7 @@ struct objnode *makenode(struct objnode *objx)
 // inserts object's body and shape into the space
 void insertobj(cpSpace * space, struct objnode *objx)
 {
-    if (objx->b != NULL)
+    if (!cpBodyIsStatic(objx->b))
 	cpSpaceAddBody(space, objx->b);
     if (objx->s != NULL)
 	cpSpaceAddShape(space, objx->s);
@@ -350,7 +363,9 @@ void rmobj(struct objnode *objx)
     }
 
     cpShapeFree(objx->s);
-    cpBodyFree(objx->b);
+    if (!cpBodyIsStatic(objx->b))
+        cpBodyFree(objx->b);
+
     objx->prev->next = objx->next;
     if (objx->next)
 	objx->next->prev = objx->prev;
