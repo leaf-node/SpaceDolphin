@@ -45,11 +45,11 @@ struct objnode {
 
 #define DT       5e5		// 5e5 nanoseconds: physics engine time step size
 #define MAXFPS   60		// max frames per second
-#define MAXFT    ((long) 1e9 / MAXFPS)	// max frame time
+#define MINFT    ((long) 1e9 / MAXFPS)	// min frame time
 #define MINFPS   20		// min frames per second
-#define MINFT    ((long) 1e9 / MINFPS)	// min frame time
+#define MAXFT    ((long) 1e9 / MINFPS)	// max frame time
 #define MINIDLEP 5		// minimum % of cpu to leave idle
-#define NITER    30		// number of frames to average, to calc actual fps
+#define NITER    MAXFPS		// n of frames to average, to calc actual fps
 #define SHOWFPS  true		// show the fps if true
 
 #define SS(s) (4 * (s))		// scaling factor for display

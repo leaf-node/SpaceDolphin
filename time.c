@@ -53,21 +53,27 @@ void framerate(long simtime, double *simrate, int *fps)
 
 // return capped length of time for the last cycle through main()'s loop
 // (this value is used to tell the physics engine how much time to simulate.)
-// also slow things down to MAXFPS; leave at least 3% cpu idle
+// also slow things down to MAXFPS; leave at least MINIDLEP% cpu idle
 long timebal(long *markt)
 {
-    long waitt, simtime, minidle;
+    static long waitt;
+    long simtime, minidle, extraft;
 
     simtime = curns() - *markt;
     *markt = curns();
 
     // avoid positive feedback loop causing scheduled simulation time to
     // escalate on slower machines
-    simtime = (simtime > MINFT) ? MINFT : simtime;
+    simtime = (simtime > MAXFT) ? MAXFT : simtime;
 
-    waitt = MAXFT - simtime / 2;	// aim for the desired fps or less
+    extraft = MINFT - simtime;
+    // aim for the desired fps or less. approach a balanced idle time based on
+    // the previous frame's idle time.
+    waitt = waitt + extraft / 10;
+
     minidle = simtime * MINIDLEP / 100;	// free a minimum of MINIDLEP% cpu
-    waitt = (waitt <= minidle) ? minidle : waitt;
+    waitt = (waitt > minidle) ? waitt : minidle;
+
     waitns(waitt);
 
     return simtime;
