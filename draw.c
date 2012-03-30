@@ -149,10 +149,10 @@ void drawfps(cairo_t * cr, long simtime)
 	sprintf(s, "Framerate: %3d fps", fps);
 	//   cairo_text_extents(cr, s, &te);
 	cairo_scale(cr, 1.0, -1.0);
-	cairo_move_to(cr, -77, -114);
+	cairo_move_to(cr, 3, -114);
 	cairo_show_text(cr, s);
 	sprintf(s, "Simulation rate: %1.2lfx", simrate);
-	cairo_move_to(cr, -77, -110);
+	cairo_move_to(cr, 3, -110);
 	cairo_show_text(cr, s);
 	cairo_scale(cr, 1.0, -1.0);
     }
@@ -163,10 +163,10 @@ void drawfps(cairo_t * cr, long simtime)
 void cairoerase(cairo_t * cr)
 {
     cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_move_to(cr, -80, 0);
-    cairo_line_to(cr, 80, 0);
-    cairo_line_to(cr, 80, 120);
-    cairo_line_to(cr, -80, 120);
+    cairo_move_to(cr, 0, 0);
+    cairo_line_to(cr, 160, 0);
+    cairo_line_to(cr, 160, 120);
+    cairo_line_to(cr, 0, 120);
     cairo_close_path(cr);
     cairo_fill(cr);
 }
@@ -200,7 +200,8 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
     *cr = cairo_create(*surface);
 
     cairo_scale(*cr, 4.0, -4.0);
-    cairo_translate(*cr, 79.875, -119.875);
+    //cairo_translate(*cr, 79.875, -119.875);
+    cairo_translate(*cr, -0.125, -119.875);
 
 }
 

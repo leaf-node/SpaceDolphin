@@ -49,16 +49,16 @@ struct objnode {
 
 #define DT       5e5		// 5e5 nanoseconds: physics engine time step size
 #define MAXFPS   60		// max frames per second
-#define MAXFT    ((long) 1e9 / MAXFPS)	// max frame time
+#define MINFT    ((long) 1e9 / MAXFPS)	// min frame time
 #define MINFPS   20		// min frames per second
-#define MINFT    ((long) 1e9 / MINFPS)	// min frame time
+#define MAXFT    ((long) 1e9 / MINFPS)	// max frame time
 #define MINIDLEP 5		// minimum % of cpu to leave idle
-#define NITER    30		// number of frames to average, to calc actual fps
+#define NITER    MAXFPS		// n of frames to average, to calc actual fps
 #define SHOWFPS  true		// show the fps if true
 
-#define SS(s) (4* (s))		// scaling factor for display
-#define SX(x) (320 + SS(x))	// slide the coordinates
-#define SY(y) (480 - SS(y))	// flip and slide the coordinates
+#define SS(s) (4 * (s))		// scaling factor for display
+#define SX(x) (SS(x))		// scale the coordinates
+#define SY(y) (480 - SS(y))	// scale and slide the coordinates
 
 #define FORCE       800.0	// force of rocket's jetpack
 #define TFORCE      400.0	// proportional to torque of rocket
@@ -69,15 +69,15 @@ struct objnode {
 #define VGRAV	    -75.0	// upwards gravity (so negative means down)
 #define BGRAV      1000.0	// gravity towards any black holes
 
-#define XMAX         80.0
-#define XMIN        -80.0
+#define XMAX        160.0
+#define XMIN          0.0
 #define YMAX        120.0
 #define YMIN          0.0
 #define XYBUF        20.0
 
 #define randfit(objx, r) \
-    randv(objx, cpv(XMIN + XYBUF, YMIN + XYBUF), \
-	    cpv(XMAX - XYBUF, YMAX - XYBUF), r)
+    (randv((objx), cpv(XMIN + XYBUF, YMIN + XYBUF), \
+	    cpv(XMAX - XYBUF, YMAX - XYBUF), (r)))
 
 #define PI   3.1415926535
 
