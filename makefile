@@ -23,7 +23,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 all: $(NAME)
 
 $(NAME): $(ODIR) $(OBJ)
-	gcc -g $(CFLAGS) $(LIBS) $(OBJ) $(STATIC) -o $@
+	$(CC) -g $(CFLAGS) $(LIBS) $(OBJ) $(STATIC) -o $@
 	@echo "\nSuccess. To play, run this command:\n\n./spacedolphin\n"
 
 $(ODIR):
