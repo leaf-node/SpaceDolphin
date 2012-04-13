@@ -57,9 +57,11 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     cpSpaceSetGravity(space, gravity);
 
 
+/* boundaries for the game... */
     cpVect fwedgeverts[4] = {cpv(-1,-1), cpv(-1,11), cpv(60,11), cpv(108,-1)};
     objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
     objx->c1 = 0x00000000; //transparent body
+    objx->c2 = 0xFF0000FF;
 
     objx = makeline(objx, space, true, cpv(99, 1), cpv(160, 1));
     objx = makeline(objx, space, true, cpv(0, 119), cpv(160, 119));
@@ -67,12 +69,14 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     objx = makeline(objx, space, true, cpv(159, 120), cpv(159, 0));
 
 
+/* deterministically placed objects... */
     objx = makecirc(objx, space, false, 1.0, 10, cpv(120, 57));
     objx = makecirc(objx, space, false, 0.36, 3, cpv(120, 45));
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
     objx->c1 = 0x8800FFFF;
+    objx->c2 = 0xFF0000FF;
 
     objx = makebhole(objx, space, 1, 5, cpv(100, 70));
     cpShapeSetLayers(objx->s, BHOLE);
@@ -82,6 +86,7 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     objx = makerect(objx, space, 0.25, 8, cpv(80, 20));
 
 
+/* randomly placed objects... */
     srandom(curns());
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.5, 5, randfit(objx, 5));
@@ -158,8 +163,8 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 
     cpShapeSetFriction(objx->s, 0.7f);
     cpShapeSetElasticity(objx->s, 0.4f);
-    objx->c1 = 0x00FF00FF;
-    objx->c2 = 0xFF0000FF;
+    objx->c1 = 0x0000FFFF;
+    objx->c2 = 0x888888FF;
 
     return objx;
 }
@@ -186,7 +191,7 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
     cpShapeSetFriction(objx->s, 1);
     cpShapeSetElasticity(objx->s, 0.7f);
     objx->c1 = 0xFF0000FF;
-    objx->c2 = 0xFF00FFFF;
+    objx->c2 = 0x00000000;
 
     return objx;
 }
@@ -243,7 +248,9 @@ struct objnode *maketria(struct objnode *objx, cpSpace * space,
 
     cpShapeSetFriction(objx->s, 0.50);
 
-    return makepoly(objx, space, false, mass, 3, verts, pos);
+    objx = makepoly(objx, space, false, mass, 3, verts, pos);
+
+    return objx;
 }
 
 // makes a rectangle...
@@ -260,7 +267,9 @@ struct objnode *makerect(struct objnode *objx, cpSpace * space,
     verts[2] = cpv(hw, hw);
     verts[3] = cpv(hw, -hw);
 
-    return makepoly(objx, space, false, mass, 4, verts, pos);
+    objx = makepoly(objx, space, false, mass, 4, verts, pos);
+
+    return objx;
 }
 
 // picks a random spot to place an object, then calls nearobjs() to test it.

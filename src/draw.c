@@ -30,7 +30,7 @@ void drawshapes(SDL_Surface * screen, struct objnode *objroot,
     struct objnode *objx = objroot;
 
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-    while ((objx = objx->next)) {
+    while ((objx = objx->next) != NULL) {
 	switch (objx->kind) {
 	case S_CIRC:
 	    drawcirc(screen, objx);
