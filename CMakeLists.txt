@@ -36,8 +36,7 @@ else(USE_LOCAL_CP)
 endif(USE_LOCAL_CP)
 
 
-find_package (SDL REQUIRED)
-set (EXTRA_LIBS ${EXTRA_LIBS} m ${SDL_LIBRARIES} SDL_gfx)
+set (EXTRA_LIBS ${EXTRA_LIBS} m SDL SDL_gfx)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
