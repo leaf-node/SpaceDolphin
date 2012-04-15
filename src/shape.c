@@ -229,7 +229,7 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
     cpBodySetVelLimit(objx->b, 0);
     cpBodySetAngVel(objx->b, 10);
     objx->c1 = 0x22222288;
-    objx->c2 = 0xFFFFFF88;
+    objx->c2 = 0x88888888;
 
     return objx;
 }

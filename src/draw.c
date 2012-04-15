@@ -59,13 +59,13 @@ void drawcirc(SDL_Surface * screen, struct objnode *objx)
     pos = cpBodyGetPos(objx->b);
     filledCircleColor(screen, SX(pos.x), SY(pos.y),
 		      SS(cpCircleShapeGetRadius(objx->s)), objx->c1);
-    aacircleColor(screen, SX(pos.x), SY(pos.y),
-		  SS(cpCircleShapeGetRadius(objx->s)), objx->c2);
+    circleColor(screen, SX(pos.x), SY(pos.y),
+		SS(cpCircleShapeGetRadius(objx->s)), objx->c2);
     radiusv = cpvmult(cpvforangle(cpBodyGetAngle(objx->b)),
 		      cpCircleShapeGetRadius(objx->s));
-    aalineColor(screen,
-		SX(pos.x), SY(pos.y), SX(radiusv.x + pos.x),
-		SY(radiusv.y + pos.y), objx->c2);
+    lineColor(screen,
+	      SX(pos.x), SY(pos.y), SX(radiusv.x + pos.x),
+	      SY(radiusv.y + pos.y), objx->c2);
 }
 
 // draws a line segment
@@ -75,8 +75,8 @@ void drawlseg(SDL_Surface * screen, struct objnode *objx)
 
     enda = cpSegmentShapeGetA(objx->s);
     endb = cpSegmentShapeGetB(objx->s);
-    aalineColor(screen, SX(enda.x), SY(enda.y), SX(endb.x), SY(endb.y),
-		objx->c1);
+    lineColor(screen, SX(enda.x), SY(enda.y), SX(endb.x), SY(endb.y),
+	      objx->c1);
 }
 
 // draws a polygon
@@ -96,7 +96,7 @@ void drawpoly(SDL_Surface * screen, struct objnode *objx)
 	yverts[i] = SY(vert.y);
     }
     filledPolygonColor(screen, xverts, yverts, numv, objx->c1);
-    aapolygonColor(screen, xverts, yverts, numv, objx->c2);
+    polygonColor(screen, xverts, yverts, numv, objx->c2);
 }
 
 // draws frames per second on screen (converts from simulation time)
