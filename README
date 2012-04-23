@@ -1,0 +1,37 @@
+This is a simple little toy game released under the GPLv3+. It uses the
+Chipmunk Physics engine, which is under a permissive license.
+
+
+NOTE: This is not the master branch!! You probably want to use that one instead
+because it uses a faster graphics library. This branch uses cairo, which draws
+smoother graphcs.
+
+
+Build Instructions:
+
+SDL, cairo, and CMake need to be installed to build and run this game. The
+following command will install these packages for you in an apt-based packaging
+system, used by many distros of GNU/Linux: (Pacakge names may be different in
+newer or older systems.)
+
+    sudo apt-get install build-essential cmake libsdl1.2-dev libcario2-dev
+
+To build the game in the SpaceDolphin directory, run:
+
+    mkdir build ; cd build
+    cmake ..
+    make
+
+CMake will automatically build and statically link the included Chipmunk
+Physics library, without needing to install it.
+
+
+Game Instructions
+
+To play the game, run this:
+
+    ./spacedolphin
+
+Control your flight with the arrow keys so that you can knock objects around
+the screen. Go nuts with it! :)
+
