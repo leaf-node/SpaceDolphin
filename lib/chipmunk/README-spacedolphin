@@ -1,0 +1,11 @@
+This is the source code to Chipmunk Physics v 6.0.3, but with the Demos
+removed. I've also changed the CMakeLists.txt files to contain only what is
+necessary to build this particular project.
+
+If you want to play with demos, or want to build the dynamic library, visit the
+program's web page:
+
+http://chipmunk-physics.net/
+
+And thanks, Howling Moon Software! :)
+

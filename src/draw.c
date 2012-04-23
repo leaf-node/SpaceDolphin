@@ -31,7 +31,7 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
     struct objnode *objx = objroot;
 
     cairoerase(cr);
-    while ((objx = objx->next)) {
+    while ((objx = objx->next) != NULL) {
 	switch (objx->kind) {
 	case S_CIRC:
 	    drawcirc(cr, objx);

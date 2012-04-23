@@ -30,13 +30,14 @@ struct movement {
 };
 
 // forces from previous calculation
-struct histf {
+struct forces {
     cpVect force;
     cpVect tforce;
 };
 
 
-void applyforces(struct objnode *vehicle, struct movement *direct);
+void blastengines(struct objnode *vehicle, struct movement *direct);
+void applyforces(struct objnode *vehicle, struct forces f);
 
 
 // query for button press change, then call applyforces()
@@ -99,16 +100,17 @@ void interact(cpSpace * space, struct objnode *objroot,
 	}
     }
 
-    applyforces(vehicle, direct);
+    blastengines(vehicle, direct);
 
 }
 
-// adds forces triggered by holding the movement keys down
+// calculates and adds forces triggered by holding the movement keys down
 // it also has to stop the forces applied from the prev call to this function
-void applyforces(struct objnode *vehicle, struct movement *direct)
+void blastengines(struct objnode *vehicle, struct movement *direct)
 {
     cpFloat force = 0, tforce = 0;
-    static struct histf prevf = { {0, 0}, {0, 0} };
+    static struct forces prevf = { {0, 0}, {0, 0} };
+    struct forces newf;
     cpVect rotv = cpBodyGetRot(vehicle->b);
 
     // these test cases are to enforce soft limits on the rate of movement
@@ -127,22 +129,27 @@ void applyforces(struct objnode *vehicle, struct movement *direct)
 	if (cpBodyGetAngVel(vehicle->b) > -MAXANGVEL)
 	    tforce = -TFORCE;
     }
-    // subtract the previous forces
-    cpBodyApplyForce(vehicle->b, cpvneg(prevf.force), cpvzero);
-    cpBodyApplyForce(vehicle->b, cpvneg(prevf.tforce), cpv(RLEN, 0));
-    cpBodyApplyForce(vehicle->b, prevf.tforce, cpv(-RLEN, 0));
 
-    // calculate the new forces
-    prevf.force = cpvrotate(cpv(0, force), rotv);
-    prevf.tforce = cpv(0, tforce);
+    newf.force = cpvrotate(cpv(0, force), rotv);
+    newf.tforce = cpv(0, tforce);
 
-    // apply the new forces
-    cpBodyApplyForce(vehicle->b, prevf.force, cpvzero);
-    cpBodyApplyForce(vehicle->b, prevf.tforce, cpv(RLEN, 0));
-    cpBodyApplyForce(vehicle->b, cpvneg(prevf.tforce), cpv(-RLEN, 0));
+    applyforces(vehicle, prevf);
+    applyforces(vehicle, newf);
 
+    prevf.force = cpvneg(newf.force);
+    prevf.tforce = cpvneg(newf.tforce);
 }
 
+// apply a lasting external force to the center of gravity
+// apply lasting forces perpendicluar to vectors from the c.o.g.
+// (in other words, push and rotate the object)
+// these need to be subtracted later to stop their effect
+void applyforces(struct objnode *vehicle, struct forces f)
+{
+    cpBodyApplyForce(vehicle->b, f.force, cpvzero);
+    cpBodyApplyForce(vehicle->b, f.tforce, cpv(RLEN, 0));
+    cpBodyApplyForce(vehicle->b, cpvneg(f.tforce), cpv(-RLEN, 0));
+}
 
 // make no changes to a body's movement
 void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
