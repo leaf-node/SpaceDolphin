@@ -44,7 +44,7 @@ struct objnode {
 #define DURATION INFINITY	// max length of game in nanoseconds
 
 #define DT       5e5		// 5e5 nanoseconds: physics engine time step size
-#define MAXFPS   60		// max frames per second
+#define MAXFPS   55		// max frames per second
 #define MINFT    ((long) 1e9 / MAXFPS)	// min frame time
 #define MINFPS   20		// min frames per second
 #define MAXFT    ((long) 1e9 / MINFPS)	// max frame time
