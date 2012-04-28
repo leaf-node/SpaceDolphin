@@ -42,9 +42,10 @@ void applyforces(struct objnode *vehicle, struct forces f);
 
 // query for button press change, then call applyforces()
 void interact(cpSpace * space, struct objnode *objroot,
-	      struct objnode *vehicle)
+	      struct objnode *vehicle, SDL_Surface ** screen)
 {
     SDL_Event event;
+    bool togglefsm = false;
 
     static struct movement direct[1] = { {0, 0, 0, 0, 0, 0} };
     while (SDL_PollEvent(&event)) {
@@ -63,6 +64,10 @@ void interact(cpSpace * space, struct objnode *objroot,
 	    case SDLK_RIGHT:
 		direct->cw = true;
 		break;
+	    case SDLK_f:
+		togglefsm = true;
+		break;
+	    case SDLK_q:
 	    case SDLK_ESCAPE:
 		rmobjs(objroot);
 		cpSpaceFree(space);
@@ -101,6 +106,9 @@ void interact(cpSpace * space, struct objnode *objroot,
     }
 
     blastengines(vehicle, direct);
+
+    if (togglefsm == true)
+	*screen = togglefullscreen();
 
 }
 

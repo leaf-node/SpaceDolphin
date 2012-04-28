@@ -43,8 +43,10 @@ struct objnode {
     struct objnode *next;
 };
 
+#define DEBUG	    false
+#define SHOWFPS	    true	// show the fps if true
+#define FULLSCREEN  false	// is fullscreen mode the default?
 
-// #define DURATION 6e9
 #define DURATION INFINITY	// max length of game in nanoseconds
 
 #define DT       5e5		// 5e5 nanoseconds: physics engine time step size
@@ -54,11 +56,6 @@ struct objnode {
 #define MAXFT    ((long) 1e9 / MINFPS)	// max frame time
 #define MINIDLEP 5		// minimum % of cpu to leave idle
 #define NITER    MAXFPS		// n of frames to average, to calc actual fps
-#define SHOWFPS  true		// show the fps if true
-
-#define SS(s) (4 * (s))		// scaling factor for display
-#define SX(x) (SS(x))		// scale the coordinates
-#define SY(y) (480 - SS(y))	// scale and slide the coordinates
 
 #define FORCE       800.0	// force of rocket's jetpack
 #define TFORCE      400.0	// proportional to torque of rocket
@@ -86,13 +83,14 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr);
 long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 		struct objnode *objroot);
+SDL_Surface *togglefullscreen(void);
 
 // shape.c
 cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);
 
 // move.c
 void interact(cpSpace * space, struct objnode *objroot,
-	      struct objnode *vehicle);
+	      struct objnode *vehicle, SDL_Surface ** screen);
 void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 

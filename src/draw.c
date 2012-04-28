@@ -22,6 +22,7 @@ void drawlseg(cairo_t * cr, struct objnode *objx);
 void drawpoly(cairo_t * cr, struct objnode *objx);
 void drawfps(cairo_t * cr, long simtime);
 void cairoerase(cairo_t * cr);
+SDL_Surface *setupSDLscreen(void);
 
 
 // draw every shape in the link list connected to objroot
@@ -173,7 +174,7 @@ void cairoerase(cairo_t * cr)
 }
 
 
-// creates a screen to draw on
+// creates a screen and buffers to draw on
 void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr)
 {
@@ -181,17 +182,14 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 	fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 	exit(1);
     }
+    SDL_ShowCursor(SDL_DISABLE);
     atexit(SDL_Quit);
 
-    *screen = SDL_SetVideoMode(640, 480, 32, 0x0);
+    *screen = setupSDLscreen();
+
     *sdlbuff = SDL_CreateRGBSurface(0, 640, 480, 32,
 				    0x00FF0000, 0x0000FF00, 0x000000FF,
 				    0x0);
-    if (*screen == NULL) {
-	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-	exit(1);
-    }
-
     *surface =
 	cairo_image_surface_create_for_data((*sdlbuff)->pixels,
 					    CAIRO_FORMAT_RGB24,
@@ -204,5 +202,48 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
     cairo_scale(*cr, 4.0, -4.0);
     cairo_translate(*cr, 0, -120);
 
+}
+
+bool fullscreen = FULLSCREEN;
+
+// setup SDL screen stuff
+SDL_Surface *setupSDLscreen(void)
+{
+    SDL_Surface *screen;
+
+    if (fullscreen == true)
+	screen = SDL_SetVideoMode(640, 480, 32, SDL_FULLSCREEN |
+						SDL_HWSURFACE | SDL_DOUBLEBUF);
+    else
+	screen = SDL_SetVideoMode(640, 480, 32, 0x0);
+
+    if (screen == NULL) {
+	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
+	exit(1);
+    }
+
+#if DEBUG == true
+    if (screen->flags & SDL_FULLSCREEN)
+	printf("fullscreen, ");
+    else
+	printf("windowed, ");
+    if (screen->flags & SDL_HWSURFACE)
+	printf("uses hardware surface.\n");
+    else
+	printf("doesn't use hardware surface.\n");
+#endif
+
+    return screen;
+}
+
+// toggle fullscreen mode on and off
+SDL_Surface *togglefullscreen(void)
+{
+    SDL_Surface *screen;
+
+    fullscreen = !fullscreen;
+    screen = setupSDLscreen();
+
+    return screen;
 }
 

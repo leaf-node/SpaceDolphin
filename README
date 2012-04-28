@@ -46,5 +46,9 @@ To play the game, run this:
     ./spacedolphin
 
 Control your flight with the arrow keys so that you can knock objects around
-the screen. Go nuts with it! :)
+the screen.
+
+To toggle fullscreen mode, press the 'f' key. To quit, hit ESC or 'q'.
+
+Go nuts with it! :)
 

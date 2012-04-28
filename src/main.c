@@ -41,7 +41,7 @@ int main(void)
 
 	simtime = drawshapes(screen, sdlbuff, cr, objroot);
 
-	interact(space, objroot, vehicle);
+	interact(space, objroot, vehicle, &screen);
 
 	for (acc += simtime; acc > DT; acc -= DT, t += DT)
 	    cpSpaceStep(space, (double) DT / 1e9);
