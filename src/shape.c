@@ -71,8 +71,8 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
 
 /* deterministically placed objects... */
-    objx = makecirc(objx, space, false, 1.0, 10, cpv(120, 57));
-    objx = makecirc(objx, space, false, 0.36, 3, cpv(120, 45));
+    objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
+    objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
@@ -84,13 +84,13 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     objx = makebhole(objx, space, 1, 5, cpv(40, 80));
     cpShapeSetLayers(objx->s, BHOLE);
 
-    objx = makerect(objx, space, 0.25, 8, cpv(80, 20));
+    objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
 
 
 /* randomly placed objects... */
     srandom(curns());
     for (i = 0; i < 7; i++) {
-	objx = makecirc(objx, space, false, 0.5, 5, randfit(objx, 5));
+	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
     }
