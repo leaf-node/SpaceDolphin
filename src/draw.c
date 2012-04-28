@@ -178,7 +178,7 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-	printf("Unable to initialize SDL: %s\n", SDL_GetError());
+	fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 	exit(1);
     }
     atexit(SDL_Quit);
@@ -188,7 +188,7 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 				    0x00FF0000, 0x0000FF00, 0x000000FF,
 				    0x0);
     if (*screen == NULL) {
-	printf("Unable to set video mode: %s\n", SDL_GetError());
+	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 	exit(1);
     }
 
