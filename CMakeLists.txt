@@ -35,7 +35,6 @@ else(USE_LOCAL_CP)
 
 endif(USE_LOCAL_CP)
 
-include_directories (/usr/include/cairo/)
 set (EXTRA_LIBS ${EXTRA_LIBS} m SDL cairo)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")

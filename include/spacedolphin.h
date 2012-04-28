@@ -21,7 +21,7 @@
 #include <math.h>
 #include <time.h>
 #include <SDL/SDL.h>
-#include <cairo.h>
+#include <cairo/cairo.h>
 #include <chipmunk.h>
 
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
