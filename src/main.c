@@ -51,6 +51,7 @@ int main(void)
     rmobjs(objroot);
     cpSpaceFree(space);
     cairo_surface_destroy(surface);
+    SDL_FreeSurface(sdlbuff);
 
     return 0;
 }
