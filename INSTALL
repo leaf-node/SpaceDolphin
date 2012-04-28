@@ -1,0 +1,45 @@
+SpaceDolphin
+
+This is a simple 2D game released under GPLv3+. It uses the Chipmunk Physics
+engine, which is under a permissive license.
+
+    http://sudoman.ninth.su/spacedolphin
+
+
+Pre-build Instructions:
+
+SDL, cairo, git and CMake need to be installed to build and run this game.
+The following command will install these packages for you in an apt-based
+packaging system, used by many distros of GNU/Linux: (Pacakge names may be
+different in newer or older systems.)
+
+    sudo apt-get install build-essential cmake git libsdl1.2-dev libcairo2-dev
+
+Next, you need to grab the source code, if you haven't downloaded it yet. (The
+clone only needs to be done once):
+
+    git clone git://repo.or.cz/spacedolphin.git
+
+    cd spacedolphin
+
+
+Build Instructions:
+
+To build the game in the spacedolphin directory, run:
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+CMake will automatically build and statically link the included Chipmunk
+Physics library, without needing to install it.
+
+In the future, you can pull the changes to update the source code:
+
+    git pull
+    cd build
+    make
+
+See the README file to learn about how to play the game.
+
