@@ -166,13 +166,10 @@ void drawfps(cairo_t * cr, long simtime)
 // erases the surface used by cairo
 void cairoerase(cairo_t * cr)
 {
-    cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_move_to(cr, 0, 0);
-    cairo_line_to(cr, 160, 0);
-    cairo_line_to(cr, 160, 120);
-    cairo_line_to(cr, 0, 120);
-    cairo_close_path(cr);
-    cairo_fill(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+
 }
 
 
@@ -203,9 +200,9 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 
     *cr = cairo_create(*surface);
 
+    cairo_translate(*cr, -0.5, -0.5);
     cairo_scale(*cr, 4.0, -4.0);
-    //cairo_translate(*cr, 79.875, -119.875);
-    cairo_translate(*cr, -0.125, -119.875);
+    cairo_translate(*cr, 0, -120);
 
 }
 
