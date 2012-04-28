@@ -48,7 +48,7 @@ struct objnode {
 #define DURATION INFINITY	// max length of game in nanoseconds
 
 #define DT       5e5		// 5e5 nanoseconds: physics engine time step size
-#define MAXFPS   55		// max frames per second
+#define MAXFPS   60		// max frames per second
 #define MINFT    ((long) 1e9 / MAXFPS)	// min frame time
 #define MINFPS   20		// min frames per second
 #define MAXFT    ((long) 1e9 / MINFPS)	// max frame time
@@ -84,8 +84,8 @@ struct objnode {
 // draw.c
 void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr);
-void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
-		struct objnode *objroot, long simtime);
+long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot);
 
 // shape.c
 cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);
@@ -98,7 +98,7 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 
 // time.c
 void framerate(long simtime, double *simrate, int *fps);
-long timebal(long *markt);
+long timebal(void);
 void waitns(long ns);
 void convtns(long ns, struct timespec *tp);
 long curns(void);

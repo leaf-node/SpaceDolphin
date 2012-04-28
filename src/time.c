@@ -47,36 +47,44 @@ void framerate(long simtime, double *simrate, int *fps)
     }
 
     *simrate = (simsum == -1) ? -1 : (double) simsum / frmsum;
-    *fps = (frmsum == -1) ? -1 : (long) 1e9 *NITER / frmsum;
+    *fps = (frmsum == -1) ? -1 : round((double) 1e9 * NITER / frmsum);
 
 }
 
 // return capped length of time for the last cycle through main()'s loop
 // (this value is used to tell the physics engine how much time to simulate.)
 // also slow things down to MAXFPS; leave at least MINIDLEP% cpu idle
-long timebal(long *markt)
+long timebal(void)
 {
-    static long waitt;
-    long simtime, minidle, extraft;
+    static long markt, markt2, waitdiff;
+    long waitt, truewaitt, calctime, minidle, totalt;
 
-    simtime = curns() - *markt;
-    *markt = curns();
+    if (markt == 0)
+	markt = markt2 = curns();
 
-    // avoid positive feedback loop causing scheduled simulation time to
-    // escalate on slower machines
-    simtime = (simtime > MAXFT) ? MAXFT : simtime;
+    calctime = curns() - markt;
+    markt2 = curns();
 
-    extraft = MINFT - simtime;
-    // aim for the desired fps or less. approach a balanced idle time based on
-    // the previous frame's idle time.
-    waitt = waitt + extraft / 10;
-
-    minidle = simtime * MINIDLEP / 100;	// free a minimum of MINIDLEP% cpu
-    waitt = (waitt > minidle) ? waitt : minidle;
+    waitt = MINFT - calctime - waitdiff;
+    // free a minimum of MINIDLEP% cpu
+    minidle = calctime * MINIDLEP / 100;
+    waitt = (waitt < minidle) ? minidle : waitt;
 
     waitns(waitt);
+    markt = curns();
 
-    return simtime;
+    truewaitt = markt - markt2;
+    if (waitdiff == 0)
+	waitdiff = truewaitt - waitt;
+    else
+	waitdiff = (9 * waitdiff) / 10 + (truewaitt - waitt) / 10;
+
+    totalt = calctime + truewaitt;
+    // avoid positive feedback loop causing scheduled simulation time to
+    // escalate on slower machines
+    totalt = (totalt > MAXFT) ? MAXFT : totalt;
+
+    return totalt;
 }
 
 // sleep for ns nanoseconds

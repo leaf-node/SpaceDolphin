@@ -25,10 +25,11 @@ void cairoerase(cairo_t * cr);
 
 
 // draw every shape in the link list connected to objroot
-void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
-		struct objnode *objroot, long simtime)
+long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot)
 {
     struct objnode *objx = objroot;
+    long simtime;
 
     cairoerase(cr);
     while ((objx = objx->next) != NULL) {
@@ -44,6 +45,8 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 	    break;
 	}
     }
+    simtime = timebal();
+
 #if SHOWFPS
     drawfps(cr, simtime);
 #endif
@@ -51,6 +54,7 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
     SDL_BlitSurface(sdlbuff, NULL, screen, NULL);
     SDL_Flip(screen);
 
+    return simtime;
 }
 
 // draws a circle on the cairo surface

@@ -36,17 +36,15 @@ int main(void)
     space = makeshapes(objroot, &vehicle);
 
 
-    long t = 0, simtime = 0, acc = 0, markt = curns();
+    long t = 0, simtime = 0, acc = 0;
     while (t < DURATION) {
 
-	simtime = timebal(&markt);
+	simtime = drawshapes(screen, sdlbuff, cr, objroot);
 
 	interact(space, objroot, vehicle);
 
 	for (acc += simtime; acc > DT; acc -= DT, t += DT)
 	    cpSpaceStep(space, (double) DT / 1e9);
-
-	drawshapes(screen, sdlbuff, cr, objroot, simtime);
 
     }
 
