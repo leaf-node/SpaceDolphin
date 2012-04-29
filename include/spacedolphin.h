@@ -62,6 +62,7 @@ struct objnode {
 #define RLEN          4.0	// length of radius at which TFORCE is applied
 #define MAXVEL	    200.0	// soft limit for velocity
 #define MAXANGVEL     8.0	// soft limit for angular velocity
+#define TORQRAMPT     1e9	// ns over which torque ramps up while turning
 
 #define VGRAV	    -75.0	// upwards gravity (so negative means down)
 #define BGRAV      1000.0	// gravity towards any black holes

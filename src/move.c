@@ -21,12 +21,14 @@ enum { OFF, UP, DOWN, LEFT, RIGHT, R_LEFT, R_RIGHT };
 
 // remembers which key presses/forces are active
 struct movement {
-    cpFloat up;
-    cpFloat down;
-    cpFloat left;
-    cpFloat right;
-    cpFloat cw;
-    cpFloat ccw;
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+    bool cw;
+    cpFloat cwt;
+    bool ccw;
+    cpFloat ccwt;
 };
 
 // forces from previous calculation
@@ -46,8 +48,8 @@ void interact(cpSpace * space, struct objnode *objroot,
 {
     SDL_Event event;
     bool togglefsm = false;
-
-    static struct movement direct[1] = { {0, 0, 0, 0, 0, 0} };
+    static struct movement direct[1] = \
+	{{false, false, false, false, false, 0, false, 0}};
     while (SDL_PollEvent(&event)) {
 	switch (event.type) {
 	case SDL_KEYDOWN:
@@ -87,9 +89,11 @@ void interact(cpSpace * space, struct objnode *objroot,
 		break;
 	    case SDLK_LEFT:
 		direct->ccw = false;
+		direct->ccwt = 0;
 		break;
 	    case SDLK_RIGHT:
 		direct->cw = false;
+		direct->cwt = 0;
 		break;
 	    default:
 		break;
@@ -120,6 +124,9 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
     static struct forces prevf = { {0, 0}, {0, 0} };
     struct forces newf;
     cpVect rotv = cpBodyGetRot(vehicle->b);
+    cpFloat angvel;
+    long now, dt;
+    static long markt;
 
     // these test cases are to enforce soft limits on the rate of movement
     if (direct->up && !direct->down) {
@@ -130,12 +137,25 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
 	    force = -FORCE;
     }
 
-    if (direct->ccw && !direct->cw) {
-	if (cpBodyGetAngVel(vehicle->b) < MAXANGVEL)
-	    tforce = TFORCE;
-    } else if (!direct->ccw && direct->cw) {
-	if (cpBodyGetAngVel(vehicle->b) > -MAXANGVEL)
-	    tforce = -TFORCE;
+    now = curns();
+    dt = now - markt;
+    markt = now;
+
+    tforce = 0;
+    angvel = cpBodyGetAngVel(vehicle->b);
+    if (direct->ccw) {
+	direct->ccwt += dt;
+	direct->ccwt = (direct->ccwt > TORQRAMPT) ? TORQRAMPT : direct->ccwt;
+
+	if (angvel < MAXANGVEL)
+	    tforce += TFORCE * sqrt(sqrt(fabsl(direct->ccwt / TORQRAMPT)));
+    }
+    if (direct->cw) {
+	direct->cwt += dt;
+	direct->cwt = (direct->cwt > TORQRAMPT) ? TORQRAMPT : direct->cwt;
+
+	if (angvel > -MAXANGVEL)
+	    tforce += -TFORCE * sqrt(sqrt(fabsl(direct->cwt / TORQRAMPT)));
     }
 
     newf.force = cpvrotate(cpv(0, force), rotv);
