@@ -26,12 +26,14 @@ void framerate(long simtime, double *simrate, int *fps)
     static long markt = 0, frmtime = -1;
     static long simsum = -1, frmsum = -1;
     static long simtimes[NITER], frmtimes[NITER];
+    long now;
 
+    now = curns();
     if (markt == 0)
-	markt = curns();
+	markt = now;
     else {
-	frmtime = curns() - markt;
-	markt = curns();
+	frmtime = now - markt;
+	markt = now;
 
 	simtimes[i] = simtime;
 	frmtimes[i++] = frmtime;
@@ -57,13 +59,14 @@ void framerate(long simtime, double *simrate, int *fps)
 long timebal(void)
 {
     static long markt, markt2, waitdiff;
-    long waitt, truewaitt, calctime, minidle, totalt;
+    long now, waitt, truewaitt, calctime, minidle, totalt;
 
+    now = curns();
     if (markt == 0)
-	markt = markt2 = curns();
+	markt = markt2 = now;
 
-    calctime = curns() - markt;
-    markt2 = curns();
+    calctime = now - markt;
+    markt2 = now;
 
     waitt = MINFT - calctime - waitdiff;
     // free a minimum of MINIDLEP% cpu
