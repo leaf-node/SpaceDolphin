@@ -25,6 +25,7 @@ enum groups { FLOATG = 1 };
 
 struct objnode *makenode(struct objnode *objx);
 void insertobj(cpSpace * space, struct objnode *objx);
+cpVect randfit(struct objnode *objx, cpFloat r);
 cpVect randv(struct objnode *objlast, cpVect p1, cpVect p2, cpFloat width);
 bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
 struct color_rgba setcolor(float r, float g, float b, float a);
@@ -286,7 +287,17 @@ struct color_rgba setcolor(float r, float g, float b, float a)
     return color;
 }
 
-// picks a random spot to place an object, then calls nearobjs() to test it.
+// fit an object within specified bounds.
+cpVect randfit(struct objnode *objx, cpFloat r)
+{
+    cpVect p1, p2;
+    p1 = cpv(XMIN + XYBUF, YMIN + XYBUF);
+    p2 = cpv(XMAX - XYBUF, YMAX - XYBUF);
+
+    return randv(objx, p1, p2, r);
+}
+
+// picks a random spot to place an object, until nearobjs() returns false.
 cpVect randv(struct objnode * objlast, cpVect p1, cpVect p2, cpFloat width)
 {
     int i;

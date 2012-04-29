@@ -73,10 +73,6 @@ struct objnode {
 #define YMIN          0.0
 #define XYBUF        20.0
 
-#define randfit(objx, r) \
-    (randv((objx), cpv(XMIN + XYBUF, YMIN + XYBUF), \
-	    cpv(XMAX - XYBUF, YMAX - XYBUF), (r)))
-
 #define PI   3.1415926535
 
 // draw.c
