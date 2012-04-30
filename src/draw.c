@@ -75,7 +75,7 @@ void drawcirc(cairo_t * cr, struct objnode *objx)
 			  objx->c1.a);
     cairo_fill_preserve(cr);
 
-    cairo_set_line_width(cr, 0.25);
+    cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
 			  objx->c2.a);
     cairo_stroke(cr);
@@ -97,7 +97,7 @@ void drawlseg(cairo_t * cr, struct objnode *objx)
     cairo_move_to(cr, enda.x, enda.y);
     cairo_line_to(cr, endb.x, endb.y);
 
-    cairo_set_line_width(cr, 0.25);
+    cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
 			  objx->c1.a);
     cairo_stroke(cr);
@@ -130,7 +130,7 @@ void drawpoly(cairo_t * cr, struct objnode *objx)
 			  objx->c1.a);
     cairo_fill_preserve(cr);
 
-    cairo_set_line_width(cr, 0.25);
+    cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
 			  objx->c2.a);
     cairo_stroke(cr);
@@ -187,7 +187,7 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 
     *screen = setupSDLscreen();
 
-    *sdlbuff = SDL_CreateRGBSurface(0, 640, 480, 32,
+    *sdlbuff = SDL_CreateRGBSurface(0, XMAX * SCALEF, YMAX * SCALEF, 32,
 				    0x00FF0000, 0x0000FF00, 0x000000FF,
 				    0x0);
     *surface =
@@ -198,9 +198,9 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 
     *cr = cairo_create(*surface);
 
-    cairo_translate(*cr, -0.5, -0.5);
-    cairo_scale(*cr, 4.0, -4.0);
-    cairo_translate(*cr, 0, -120);
+    cairo_translate(*cr, -0.5, -0.5);	    // align to pixel center
+    cairo_scale(*cr, SCALEF, -SCALEF);	    // scale + flip image over x axis
+    cairo_translate(*cr, XMIN, -YMAX);	    // shift image vertically
 
 }
 
@@ -212,10 +212,10 @@ SDL_Surface *setupSDLscreen(void)
     SDL_Surface *screen;
 
     if (fullscreen == true)
-	screen = SDL_SetVideoMode(640, 480, 32, SDL_FULLSCREEN |
-						SDL_HWSURFACE | SDL_DOUBLEBUF);
+	screen = SDL_SetVideoMode(XMAX * SCALEF, YMAX * SCALEF, 32, \
+	    SDL_FULLSCREEN | SDL_HWSURFACE | SDL_DOUBLEBUF);
     else
-	screen = SDL_SetVideoMode(640, 480, 32, 0x0);
+	screen = SDL_SetVideoMode(XMAX * SCALEF, YMAX * SCALEF, 32, 0x0);
 
     if (screen == NULL) {
 	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());

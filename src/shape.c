@@ -60,15 +60,22 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
 
 /* boundaries for the game... */
-    cpVect fwedgeverts[4] = {cpv(-1,-1), cpv(-1,11), cpv(60,11), cpv(108,-1)};
+    cpVect fwedgeverts[4] = {cpv(XMIN - 1, YMIN - 1),
+			     cpv(XMIN - 1, YMIN + 11),
+			     cpv(XMAX / 2 - 20, YMIN + 11),
+			     cpv(XMAX / 2 + 28, YMIN - 1)};
     objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
     objx->c1 = setcolor(0, 0, 0, 0); //transparent body
     objx->c2 = setcolor(1, 0, 0, 1);
 
-    objx = makeline(objx, space, true, cpv(99, 1), cpv(160, 1));
-    objx = makeline(objx, space, true, cpv(0, 119), cpv(160, 119));
-    objx = makeline(objx, space, true, cpv(1, 120), cpv(1, 10));
-    objx = makeline(objx, space, true, cpv(159, 120), cpv(159, 0));
+    objx = makeline(objx, space, true, cpv(XMAX / 2 + 19, YMIN + 1),
+				       cpv(XMAX, YMIN + 1));
+    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
+				       cpv(XMAX, YMAX - 1));
+    objx = makeline(objx, space, true, cpv(XMIN + 1, YMAX),
+				       cpv(XMIN + 1, YMIN + 10));
+    objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
+				       cpv(XMAX - 1, YMIN));
 
 
 /* deterministically placed objects... */

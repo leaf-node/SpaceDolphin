@@ -73,6 +73,9 @@ struct objnode {
 #define YMIN          0.0
 #define XYBUF        20.0
 
+#define SCALEF	      4.0
+#define LPIXW	      1.0
+
 #define PI   3.1415926535
 
 // draw.c
