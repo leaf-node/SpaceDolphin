@@ -89,11 +89,9 @@ void interact(cpSpace * space, struct objnode *objroot,
 		break;
 	    case SDLK_LEFT:
 		direct->ccw = false;
-		direct->ccwt = 0;
 		break;
 	    case SDLK_RIGHT:
 		direct->cw = false;
-		direct->cwt = 0;
 		break;
 	    default:
 		break;
@@ -148,14 +146,23 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
 	direct->ccwt = (direct->ccwt > TORQRAMPT) ? TORQRAMPT : direct->ccwt;
 
 	if (angvel < MAXANGVEL)
-	    tforce += TFORCE * sqrt(sqrt(fabsl(direct->ccwt / TORQRAMPT)));
+	    tforce += TFORCE * sqrtl(direct->ccwt / TORQRAMPT);
     }
+    else if (direct->ccwt > 0) {
+	direct->ccwt -= dt;
+	direct->ccwt = (direct->ccwt < 0) ? 0 : direct->ccwt;
+    }
+
     if (direct->cw) {
 	direct->cwt += dt;
 	direct->cwt = (direct->cwt > TORQRAMPT) ? TORQRAMPT : direct->cwt;
 
 	if (angvel > -MAXANGVEL)
-	    tforce += -TFORCE * sqrt(sqrt(fabsl(direct->cwt / TORQRAMPT)));
+	    tforce += -TFORCE * sqrtl(direct->cwt / TORQRAMPT);
+    }
+    else if (direct->cwt > 0) {
+	direct->cwt -= dt;
+	direct->cwt = (direct->cwt < 0) ? 0 : direct->cwt;
     }
 
     newf.force = cpvrotate(cpv(0, force), rotv);
