@@ -57,15 +57,16 @@ struct objnode {
 #define MINIDLEP 5		// minimum % of cpu to leave idle
 #define NITER    MAXFPS		// n of frames to average, to calc actual fps
 
-#define FORCE       800.0	// force of rocket's jetpack
+#define FORCE       400.0	// force of rocket's jetpack
 #define TFORCE      400.0	// proportional to torque of rocket
 #define RLEN          4.0	// length of radius at which TFORCE is applied
 #define MAXVEL	    200.0	// soft limit for velocity
 #define MAXANGVEL     8.0	// soft limit for angular velocity
 #define TORQRAMPT     1e9	// ns over which torque ramps up while turning
 
-#define VGRAV	    -75.0	// upwards gravity (so negative means down)
-#define BGRAV      1000.0	// gravity towards any black holes
+//#define VGRAV	    -50.0	// upwards gravity (so negative means down)
+#define VGRAV	      0.0	// upwards gravity (so negative means down)
+#define BGRAV     64000.0	// gravity towards any black holes
 
 #define XMAX        160.0
 #define XMIN          0.0
