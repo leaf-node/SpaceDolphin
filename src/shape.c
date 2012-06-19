@@ -17,8 +17,8 @@
 
 #include "spacedolphin.h"
 
-#define BHOLE           1	// the isloated layer for black holes
-#define NONBH          ~1	// layer so things don't collide with black holes
+#define BHOLE	    1	    // the isloated layer for black holes
+#define NONBH	    1 << 1  // layer so things don't collide with black holes
 
 enum groups { FLOATG = 1 };
 
@@ -26,7 +26,7 @@ enum groups { FLOATG = 1 };
 struct objnode *makenode(struct objnode *objx);
 void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randfit(struct objnode *objx, cpFloat r);
-cpVect randv(struct objnode *objlast, cpVect p1, cpVect p2, cpFloat width);
+cpFloat randrange(cpFloat min, cpFloat max);
 bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
 struct color_rgba setcolor(float r, float g, float b, float a);
 
@@ -65,7 +65,8 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 			     cpv(XMAX / 2 - 20, YMIN + 11),
 			     cpv(XMAX / 2 + 28, YMIN - 1)};
     objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
-    objx->c1 = setcolor(0, 0, 0, 0); //transparent body
+    cpShapeSetLayers(objx->s, ~((cpLayers) 0)); // override default layers
+    objx->c1 = setcolor(0, 0, 0, 0); //invisible body
     objx->c2 = setcolor(1, 0, 0, 1);
 
     objx = makeline(objx, space, true, cpv(XMAX / 2 + 19, YMIN + 1),
@@ -77,30 +78,38 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
 				       cpv(XMAX - 1, YMIN));
 
+    // needed before random intial velocities and placement
+    srandom(curns());
 
 /* deterministically placed objects... */
+    objx = makebhole(objx, space, 0.25, 5, cpv(100, 70));
+    cpShapeSetLayers(objx->s, BHOLE);
+    objx = makebhole(objx, space, 0.25, 5, cpv(40, 80));
+    cpShapeSetLayers(objx->s, BHOLE);
+
     objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
+    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
+    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
+    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx->c1 = setcolor(0.5, 0, 1, 1);
     objx->c2 = setcolor(  1, 0, 0, 1);
 
-    objx = makebhole(objx, space, 1, 5, cpv(100, 70));
-    cpShapeSetLayers(objx->s, BHOLE);
-    objx = makebhole(objx, space, 1, 5, cpv(40, 80));
-    cpShapeSetLayers(objx->s, BHOLE);
-
     objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
+    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 
 
 /* randomly placed objects... */
-    srandom(curns());
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
+	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
+        cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
+	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     }
 
     return space;
@@ -294,26 +303,20 @@ struct color_rgba setcolor(float r, float g, float b, float a)
     return color;
 }
 
-// fit an object within specified bounds.
-cpVect randfit(struct objnode *objx, cpFloat r)
-{
-    cpVect p1, p2;
-    p1 = cpv(XMIN + XYBUF, YMIN + XYBUF);
-    p2 = cpv(XMAX - XYBUF, YMAX - XYBUF);
-
-    return randv(objx, p1, p2, r);
-}
-
 // picks a random spot to place an object, until nearobjs() returns false.
-cpVect randv(struct objnode * objlast, cpVect p1, cpVect p2, cpFloat width)
+cpVect randfit(struct objnode *objlast, cpFloat r)
 {
     int i;
+    cpVect xymin, xymax;
     cpVect rvect;
 
+    xymin = cpv(XMIN + XYBUF, YMIN + XYBUF);
+    xymax = cpv(XMAX - XYBUF, YMAX - XYBUF);
+
     for (i = 0; i < 1000; i++) {
-	rvect.x = p1.x + random() / (double) RAND_MAX *(p2.x - p1.x);
-	rvect.y = p1.y + random() / (double) RAND_MAX *(p2.y - p1.y);
-	if (nearobjs(objlast, rvect, width))
+	rvect.x = randrange(xymin.x, xymax.x);
+	rvect.y = randrange(xymin.y, xymax.y);
+	if (nearobjs(objlast, rvect, r))
 	    return rvect;
     }
 
@@ -322,6 +325,12 @@ cpVect randv(struct objnode * objlast, cpVect p1, cpVect p2, cpFloat width)
     exit(4);
 
     return rvect;
+}
+
+// returns a random number between min and max
+cpFloat randrange(cpFloat min, cpFloat max)
+{
+    return min + random() / (double) RAND_MAX *(max - min);
 }
 
 // returns true if an object 'width' wide intersects with another object.
