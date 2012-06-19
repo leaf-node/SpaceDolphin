@@ -198,8 +198,8 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
     extern struct objnode objroot[];
     struct objnode *objx;
     struct cpBody *hole;
-    cpVect bpos, hpos, g = cpvzero;
-    cpFloat hmass, distsq;
+    cpVect bpos, hpos, unitv, g;
+    cpFloat hmass, distsq, distcb;
 
     objx = objroot;
     while ((objx = objx->next) != NULL) {
@@ -207,9 +207,15 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 	    hole = objx->b;
 	    bpos = cpBodyGetPos(body);
 	    hpos = cpBodyGetPos(hole);
-	    distsq = cpvdistsq(hpos, bpos) ? cpvdistsq(hpos, bpos) : 1e-50;
+
+	    distsq = cpvdistsq(hpos, bpos);
+	    distsq = distsq ? distsq : 1e-50; // let's not divide by zero
+	    distcb = pow(sqrt(distsq), 3);
+
 	    hmass = cpBodyGetMass(hole);
-	    g = cpvmult(cpvsub(hpos, bpos), hmass * BGRAV / distsq);
+	    unitv = cpvmult(cpvsub(hpos, bpos), (1 / sqrt(distsq)));
+	    g = cpvmult(unitv, hmass * BGRAV * (1 / distsq - 10 / distcb));
+
 	    cpBodyUpdateVelocity(body, g, damping, dt);
 	}
     }
