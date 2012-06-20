@@ -17,8 +17,8 @@
 
 #include "spacedolphin.h"
 
-#define BHOLE	    1	    // the isloated layer for black holes
-#define NONBH	    1 << 1  // layer so things don't collide with black holes
+#define BHOLE	    1		// the isloated layer for black holes
+#define NONBH	    1 << 1	// layer so things don't collide with black holes
 
 enum groups { FLOATG = 1 };
 
@@ -60,23 +60,24 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
 
 /* boundaries for the game... */
-    cpVect fwedgeverts[4] = {cpv(XMIN - 1, YMIN - 1),
-			     cpv(XMIN - 1, YMIN + 11),
-			     cpv(XMAX / 2 - 20, YMIN + 11),
-			     cpv(XMAX / 2 + 28, YMIN - 1)};
+    cpVect fwedgeverts[4] = { cpv(XMIN - 1, YMIN - 1),
+	cpv(XMIN - 1, YMIN + 11),
+	cpv(XMAX / 2 - 20, YMIN + 11),
+	cpv(XMAX / 2 + 28, YMIN - 1)
+    };
     objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
-    cpShapeSetLayers(objx->s, ~((cpLayers) 0)); // override default layers
-    objx->c1 = setcolor(0, 0, 0, 0); //invisible body
+    cpShapeSetLayers(objx->s, ~((cpLayers) 0));	// override default layers
+    objx->c1 = setcolor(0, 0, 0, 0);	//invisible body
     objx->c2 = setcolor(1, 0, 0, 1);
 
     objx = makeline(objx, space, true, cpv(XMAX / 2 + 19, YMIN + 1),
-				       cpv(XMAX, YMIN + 1));
+		    cpv(XMAX, YMIN + 1));
     objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
-				       cpv(XMAX, YMAX - 1));
+		    cpv(XMAX, YMAX - 1));
     objx = makeline(objx, space, true, cpv(XMIN + 1, YMAX),
-				       cpv(XMIN + 1, YMIN + 10));
+		    cpv(XMIN + 1, YMIN + 10));
     objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
-				       cpv(XMAX - 1, YMIN));
+		    cpv(XMAX - 1, YMIN));
 
     // needed before random intial velocities and placement
     srandom(curns());
@@ -96,7 +97,7 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx->c1 = setcolor(0.5, 0, 1, 1);
-    objx->c2 = setcolor(  1, 0, 0, 1);
+    objx->c2 = setcolor(1, 0, 0, 1);
 
     objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
@@ -107,7 +108,7 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
 	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
-        cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     }
@@ -125,8 +126,7 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     if (statb) {
 	objx->s = cpCircleShapeNew(space->staticBody, radius, cpvzero);
 	objx->b = space->staticBody;
-    }
-    else {
+    } else {
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	objx->b = cpBodyNew(mass, moment);
 	objx->s = cpCircleShapeNew(objx->b, radius, cpvzero);
@@ -161,8 +161,7 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 	objx->s =
 	    cpPolyShapeNew(space->staticBody, nverts, verts, cpvzero);
 	objx->b = space->staticBody;
-    }
-    else {
+    } else {
 	cpFloat moment = cpMomentForPoly(mass, nverts, verts, cpvzero);
 	objx->b = cpBodyNew(mass, moment);
 	objx->s = cpPolyShapeNew(objx->b, nverts, verts, cpvzero);
@@ -197,8 +196,7 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
     if (statb) {
 	objx->s = cpSegmentShapeNew(space->staticBody, v1, v2, 0);
 	objx->b = space->staticBody;
-    }
-    else {
+    } else {
 	fprintf(stderr,
 		"Error, non-static line segments are not supported.\n");
 	exit(3);
@@ -304,7 +302,7 @@ struct color_rgba setcolor(float r, float g, float b, float a)
 }
 
 // picks a random spot to place an object, until nearobjs() returns false.
-cpVect randfit(struct objnode *objlast, cpFloat r)
+cpVect randfit(struct objnode * objlast, cpFloat r)
 {
     int i;
     cpVect xymin, xymax;
@@ -334,7 +332,7 @@ cpFloat randrange(cpFloat min, cpFloat max)
 }
 
 // returns true if an object 'width' wide intersects with another object.
-bool nearobjs(struct objnode * objlast, cpVect rvect, cpFloat width)
+bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
 {
     cpFloat dist;
     struct objnode *objch = objlast;
@@ -414,7 +412,7 @@ void rmobj(struct objnode *objx)
 
     cpShapeFree(objx->s);
     if (!cpBodyIsStatic(objx->b))
-        cpBodyFree(objx->b);
+	cpBodyFree(objx->b);
 
     objx->prev->next = objx->next;
     if (objx->next)

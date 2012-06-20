@@ -64,7 +64,7 @@ struct objnode {
 #define MAXANGVEL     8.0	// soft limit for angular velocity
 #define TORQRAMPT     1e9	// ns over which torque ramps up while turning
 
-//#define VGRAV	    -50.0	// upwards gravity (so negative means down)
+//#define VGRAV     -50.0       // upwards gravity (so negative means down)
 #define VGRAV	      0.0	// upwards gravity (so negative means down)
 #define BGRAV     64000.0	// gravity towards any black holes
 

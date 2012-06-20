@@ -198,9 +198,9 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 
     *cr = cairo_create(*surface);
 
-    cairo_translate(*cr, -0.5, -0.5);	    // align to pixel center
-    cairo_scale(*cr, SCALEF, -SCALEF);	    // scale + flip image over x axis
-    cairo_translate(*cr, XMIN, -YMAX);	    // shift image vertically
+    cairo_translate(*cr, -0.5, -0.5);	// align to pixel center
+    cairo_scale(*cr, SCALEF, -SCALEF);	// scale + flip image over x axis
+    cairo_translate(*cr, XMIN, -YMAX);	// shift image vertically
 
 }
 
@@ -212,8 +212,9 @@ SDL_Surface *setupSDLscreen(void)
     SDL_Surface *screen;
 
     if (fullscreen == true)
-	screen = SDL_SetVideoMode(XMAX * SCALEF, YMAX * SCALEF, 32, \
-	    SDL_FULLSCREEN | SDL_HWSURFACE | SDL_DOUBLEBUF);
+	screen = SDL_SetVideoMode(XMAX * SCALEF, YMAX * SCALEF, 32,
+				  SDL_FULLSCREEN | SDL_HWSURFACE |
+				  SDL_DOUBLEBUF);
     else
 	screen = SDL_SetVideoMode(XMAX * SCALEF, YMAX * SCALEF, 32, 0x0);
 
@@ -221,7 +222,6 @@ SDL_Surface *setupSDLscreen(void)
 	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 	exit(1);
     }
-
 #if DEBUG == true
     if (screen->flags & SDL_FULLSCREEN)
 	printf("fullscreen, ");
@@ -246,4 +246,3 @@ SDL_Surface *togglefullscreen(void)
 
     return screen;
 }
-

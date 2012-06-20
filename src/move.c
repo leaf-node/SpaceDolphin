@@ -48,8 +48,8 @@ void interact(cpSpace * space, struct objnode *objroot,
 {
     SDL_Event event;
     bool togglefsm = false;
-    static struct movement direct[1] = \
-	{{false, false, false, false, false, 0, false, 0}};
+    static struct movement direct[1] =
+	{ {false, false, false, false, false, 0, false, 0} };
     while (SDL_PollEvent(&event)) {
 	switch (event.type) {
 	case SDL_KEYDOWN:
@@ -143,12 +143,12 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
     angvel = cpBodyGetAngVel(vehicle->b);
     if (direct->ccw) {
 	direct->ccwt += dt;
-	direct->ccwt = (direct->ccwt > TORQRAMPT) ? TORQRAMPT : direct->ccwt;
+	direct->ccwt =
+	    (direct->ccwt > TORQRAMPT) ? TORQRAMPT : direct->ccwt;
 
 	if (angvel < MAXANGVEL)
 	    tforce += TFORCE * sqrtl(direct->ccwt / TORQRAMPT);
-    }
-    else if (direct->ccwt > 0) {
+    } else if (direct->ccwt > 0) {
 	direct->ccwt -= dt;
 	direct->ccwt = (direct->ccwt < 0) ? 0 : direct->ccwt;
     }
@@ -159,8 +159,7 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
 
 	if (angvel > -MAXANGVEL)
 	    tforce += -TFORCE * sqrtl(direct->cwt / TORQRAMPT);
-    }
-    else if (direct->cwt > 0) {
+    } else if (direct->cwt > 0) {
 	direct->cwt -= dt;
 	direct->cwt = (direct->cwt < 0) ? 0 : direct->cwt;
     }
@@ -209,7 +208,7 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 	    hpos = cpBodyGetPos(hole);
 
 	    distsq = cpvdistsq(hpos, bpos);
-	    distsq = distsq ? distsq : 1e-50; // let's not divide by zero
+	    distsq = distsq ? distsq : 1e-50;	// let's not divide by zero
 	    distcb = pow(sqrt(distsq), 3);
 
 	    hmass = cpBodyGetMass(hole);
