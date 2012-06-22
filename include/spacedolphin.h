@@ -99,7 +99,8 @@ void framerate(long simtime, double *simrate, int *fps);
 long timebal(void);
 void waitns(long ns);
 void convtns(long ns, struct timespec *tp);
-long curns(void);
+void curtime(struct timespec *tp);
+long tdiff(struct timespec tp0, struct timespec tp1);
 
 // shape.c
 void rmobj(struct objnode *objx);

@@ -123,8 +123,9 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
     struct forces newf;
     cpVect rotv = cpBodyGetRot(vehicle->b);
     cpFloat angvel;
-    long now, dt;
-    static long markt;
+    long dt;
+    struct timespec now;
+    static struct timespec markt;
 
     // these test cases are to enforce soft limits on the rate of movement
     if (direct->up && !direct->down) {
@@ -135,8 +136,8 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
 	    force = -FORCE;
     }
 
-    now = curns();
-    dt = now - markt;
+    curtime(&now);
+    dt = tdiff(now, markt);
     markt = now;
 
     tforce = 0;

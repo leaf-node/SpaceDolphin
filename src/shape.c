@@ -53,6 +53,7 @@ struct objnode *maketria(struct objnode *objx, cpSpace * space,
 cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 {
     int i;
+    struct timespec time;
     cpSpace *space = cpSpaceNew();
 
     cpVect gravity = cpv(0, VGRAV);
@@ -96,7 +97,8 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
 
 /* randomly placed objects... */
-    srandom(curns());
+    curtime(&time);
+    srandom(time.tv_nsec);
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
