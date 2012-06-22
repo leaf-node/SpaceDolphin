@@ -53,6 +53,7 @@ struct objnode *maketria(struct objnode *objx, cpSpace * space,
 cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 {
     int i;
+    struct timespec time;
     cpSpace *space = cpSpaceNew();
 
     cpVect gravity = cpv(0, VGRAV);
@@ -80,7 +81,8 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 		    cpv(XMAX - 1, YMIN));
 
     // needed before random intial velocities and placement
-    srandom(curns());
+    curtime(&time);
+    srandom(time.tv_nsec);
 
 /* deterministically placed objects... */
     objx = makebhole(objx, space, 0.25, 5, cpv(100, 70));

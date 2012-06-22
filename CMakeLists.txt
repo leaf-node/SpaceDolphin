@@ -37,6 +37,7 @@ endif(USE_LOCAL_CP)
 
 set (EXTRA_LIBS ${EXTRA_LIBS} m SDL cairo)
 
+#set (CMAKE_BUILD_TYPE DEBUG)
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 

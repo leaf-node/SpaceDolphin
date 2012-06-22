@@ -23,16 +23,17 @@ void framerate(long simtime, double *simrate, int *fps)
 {
     int j;
     static int i = 0;
-    static long markt = 0, frmtime = -1;
-    static long simsum = -1, frmsum = -1;
+    static long frmtime = -1;
+    static double simsum = -1, frmsum = -1;
     static long simtimes[NITER], frmtimes[NITER];
-    long now;
+    struct timespec now;
+    static struct timespec markt;
 
-    now = curns();
-    if (markt == 0)
+    curtime(&now);
+    if (markt.tv_sec == 0 && markt.tv_nsec == 0)
 	markt = now;
     else {
-	frmtime = now - markt;
+	frmtime = tdiff(now, markt);
 	markt = now;
 
 	simtimes[i] = simtime;
@@ -56,17 +57,21 @@ void framerate(long simtime, double *simrate, int *fps)
 // return capped length of time for the last cycle through main()'s loop
 // (this value is used to tell the physics engine how much time to simulate.)
 // also slow things down to MAXFPS; leave at least MINIDLEP% cpu idle
+// TODO: avoid overflow with multi-second time deltas on 32 bit systems.
 long timebal(void)
 {
-    static long markt, markt2, waitdiff;
-    long now, waitt, truewaitt, calctime, minidle, totalt;
+    long calctime, waitt, truewaitt, minidle, totalt;
+    static long waitdiff;
+    struct timespec now;
+    static struct timespec markt, marktbeforeidle;
 
-    now = curns();
-    if (markt == 0)
-	markt = markt2 = now;
 
-    calctime = now - markt;
-    markt2 = now;
+    curtime(&now);
+    if (markt.tv_sec == 0 && markt.tv_nsec == 0)
+	markt = marktbeforeidle = now;
+
+    calctime = tdiff(now, markt);
+    marktbeforeidle = now;
 
     waitt = MINFT - calctime - waitdiff;
     // free a minimum of MINIDLEP% cpu
@@ -74,9 +79,9 @@ long timebal(void)
     waitt = (waitt < minidle) ? minidle : waitt;
 
     waitns(waitt);
-    markt = curns();
+    curtime(&markt);
 
-    truewaitt = markt - markt2;
+    truewaitt = tdiff(markt, marktbeforeidle);
     if (waitdiff == 0)
 	waitdiff = truewaitt - waitt;
     else
@@ -94,25 +99,36 @@ long timebal(void)
 void waitns(long ns)
 {
     struct timespec t;
+
     if (ns <= 0)
 	return;
     convtns(ns, &t);
     if (nanosleep(&t, NULL) != 0)
-	printf("nanosleep error ***");
+	printf("*** nanosleep error ***\n");
 }
 
 // convert nanoseconds into a struct used by nanosleep
 void convtns(long ns, struct timespec *tp)
 {
-    tp->tv_sec = ns / (long) 1e9;
+    tp->tv_sec  = ns / (long) 1e9;
     tp->tv_nsec = ns % (long) 1e9;
 }
 
 // get current monotinic time in nanoseconds
-long curns(void)
+void curtime(struct timespec *tp)
 {
-    struct timespec tp[1];
-
     clock_gettime(CLOCK_MONOTONIC, tp);
-    return tp->tv_nsec + (long) 1e9 *tp->tv_sec;
 }
+
+// returns the time delta in nanoseconds between two points
+long tdiff(struct timespec tp0, struct timespec tp1)
+{
+    long dsec, dnsec;
+
+    dsec = tp0.tv_sec - tp1.tv_sec;
+    dnsec = tp0.tv_nsec - tp1.tv_nsec;
+
+    return dsec * 1e9 + dnsec;
+
+}
+
