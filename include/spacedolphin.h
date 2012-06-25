@@ -67,6 +67,8 @@ struct objnode {
 //#define VGRAV     -50.0       // upwards gravity (so negative means down)
 #define VGRAV	      0.0	// upwards gravity (so negative means down)
 #define BGRAV     64000.0	// gravity towards any black holes
+#define RDSQ	     10.0	// squared distance from BH to apply rep. force
+#define REPFS	    400.0	// scaled strength of replellant force
 
 #define XMAX        160.0
 #define XMIN          0.0

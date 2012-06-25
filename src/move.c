@@ -198,8 +198,8 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
     extern struct objnode objroot[];
     struct objnode *objx;
     struct cpBody *hole;
-    cpVect bpos, hpos, unitv, g;
-    cpFloat hmass, distsq, distcb;
+    cpVect bpos, hpos, unitv, gvect;
+    cpFloat hmass, g, distsq;
 
     objx = objroot;
     while ((objx = objx->next) != NULL) {
@@ -209,14 +209,16 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 	    hpos = cpBodyGetPos(hole);
 
 	    distsq = cpvdistsq(hpos, bpos);
-	    distsq = distsq ? distsq : 1e-50;	// let's not divide by zero
-	    distcb = pow(sqrt(distsq), 3);
+	    distsq = (distsq == 0) ? 1e-50 : distsq;	// don't divide by zero
 
 	    hmass = cpBodyGetMass(hole);
-	    unitv = cpvmult(cpvsub(hpos, bpos), (1 / sqrt(distsq)));
-	    g = cpvmult(unitv, hmass * BGRAV * (1 / distsq - 10 / distcb));
+	    g = hmass * BGRAV * (1 / distsq);
+	    g = (distsq < RDSQ) ? g * -REPFS : g;   // shoot close balls away
 
-	    cpBodyUpdateVelocity(body, g, damping, dt);
+	    unitv = cpvmult(cpvsub(hpos, bpos), (1 / sqrt(distsq)));
+	    gvect = cpvmult(unitv, g);
+
+	    cpBodyUpdateVelocity(body, gvect, damping, dt);
 	}
     }
 }
