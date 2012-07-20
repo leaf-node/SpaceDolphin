@@ -34,7 +34,7 @@ long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 
     cairoerase(cr);
     while ((objx = objx->next) != NULL) {
-	switch (objx->kind) {
+	switch (objx->geom) {
 	case S_CIRC:
 	    drawcirc(cr, objx);
 	    break;

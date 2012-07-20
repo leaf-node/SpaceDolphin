@@ -25,6 +25,7 @@
 #include <chipmunk.h>
 
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
+enum collide { C_NONE, C_SHIP, C_COLOR };
 
 struct color_rgba {
     float r, g, b, a;
@@ -32,13 +33,15 @@ struct color_rgba {
 
 // linked list node to keep track of objects for drawing and querying
 struct objnode {
-    int kind;
+    int geom;
     int bhole;
     cpBody *b;
     cpShape *s;
     cpFloat width;
     struct color_rgba c1;
     struct color_rgba c2;
+    int cstatus;
+    struct timespec lasthit;
     struct objnode *prev;
     struct objnode *next;
 };
@@ -57,8 +60,8 @@ struct objnode {
 #define MINIDLEP 5		// minimum % of cpu to leave idle
 #define NITER    MAXFPS		// n of frames to average, to calc actual fps
 
-#define FORCE       400.0	// force of rocket's jetpack
-#define TFORCE      400.0	// proportional to torque of rocket
+#define FORCE       200.0	// force of rocket's jetpack
+#define TFORCE      200.0	// proportional to torque of rocket
 #define RLEN          4.0	// length of radius at which TFORCE is applied
 #define MAXVEL	    200.0	// soft limit for velocity
 #define MAXANGVEL     8.0	// soft limit for angular velocity
@@ -88,9 +91,6 @@ long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 		struct objnode *objroot);
 SDL_Surface *togglefullscreen(void);
 
-// shape.c
-cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);
-
 // move.c
 void interact(cpSpace * space, struct objnode *objroot,
 	      struct objnode *vehicle, SDL_Surface ** screen);
@@ -101,10 +101,17 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void framerate(long simtime, double *simrate, int *fps);
 long timebal(void);
 void waitns(long ns);
-void convtns(long ns, struct timespec *tp);
+void convttp(long ns, struct timespec *tp);
+long convtns(struct timespec tp);
 void curtime(struct timespec *tp);
-long tdiff(struct timespec tp0, struct timespec tp1);
+struct timespec tdiff(struct timespec tp0, struct timespec tp1);
 
 // shape.c
+cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);
+struct color_rgba setcolor(float r, float g, float b, float a);
 void rmobj(struct objnode *objx);
 void rmobjs(struct objnode *objroot);
+
+// collide.c
+int chcolor (cpArbiter *arb, cpSpace *space, void *data);
+

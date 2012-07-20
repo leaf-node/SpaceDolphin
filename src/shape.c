@@ -28,7 +28,6 @@ void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randfit(struct objnode *objx, cpFloat r);
 cpFloat randrange(cpFloat min, cpFloat max);
 bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
-struct color_rgba setcolor(float r, float g, float b, float a);
 
 struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
 			 cpFloat mass, cpFloat radius, cpVect pos);
@@ -50,15 +49,18 @@ struct objnode *maketria(struct objnode *objx, cpSpace * space,
 
 
 // initialize a space and then add a whole bunch of shapes and boundaries
-cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
+cpSpace *makeshapes(struct objnode *objroot, struct objnode **vehicle)
 {
     int i;
     struct timespec time;
-    cpSpace *space = cpSpaceNew();
+    cpSpace *space;
+    struct objnode *objx;
 
+    space = cpSpaceNew();
     cpVect gravity = cpv(0, VGRAV);
     cpSpaceSetGravity(space, gravity);
 
+    objx = objroot;
 
 /* boundaries for the game... */
     cpVect fwedgeverts[4] = { cpv(XMIN - 1, YMIN - 1),
@@ -86,34 +88,40 @@ cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle)
 
 /* deterministically placed objects... */
     objx = makebhole(objx, space, 0.25, 5, cpv(100, 70));
-    cpShapeSetLayers(objx->s, BHOLE);
     objx = makebhole(objx, space, 0.25, 5, cpv(40, 80));
-    cpShapeSetLayers(objx->s, BHOLE);
 
     objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+    objx->s->collision_type = C_COLOR;
     objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+    objx->s->collision_type = C_COLOR;
 
     // the "vehicle" is the object that is controlled by the keyboard
     objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+    objx->s->collision_type = C_SHIP;
     objx->c1 = setcolor(0.5, 0, 1, 1);
     objx->c2 = setcolor(1, 0, 0, 1);
 
     objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+    objx->s->collision_type = C_COLOR;
 
 
 /* randomly placed objects... */
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
 	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+	objx->s->collision_type = C_COLOR;
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     }
+
+    cpSpaceAddCollisionHandler(space, C_SHIP, C_COLOR, NULL, *chcolor, \
+	NULL, NULL, objroot);
 
     return space;
 }
@@ -123,7 +131,7 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
 			 cpFloat mass, cpFloat radius, cpVect pos)
 {
     objx = makenode(objx);
-    objx->kind = S_CIRC;
+    objx->geom = S_CIRC;
 
     if (statb) {
 	objx->s = cpCircleShapeNew(space->staticBody, radius, cpvzero);
@@ -147,6 +155,7 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     cpShapeSetElasticity(objx->s, 0.7f);
     objx->c1 = setcolor(0, 0, 1, 1);
     objx->c2 = setcolor(0.5, 0.5, 0.5, 1);
+    objx->s->collision_type = C_NONE;
 
     return objx;
 }
@@ -157,7 +166,7 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 			 cpVect pos)
 {
     objx = makenode(objx);
-    objx->kind = S_POLY;
+    objx->geom = S_POLY;
 
     if (statb) {
 	objx->s =
@@ -184,6 +193,7 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
     cpShapeSetElasticity(objx->s, 0.4f);
     objx->c1 = setcolor(0, 0, 1, 1);
     objx->c2 = setcolor(0.5, 0.5, 0.5, 1);
+    objx->s->collision_type = C_NONE;
 
     return objx;
 }
@@ -193,7 +203,7 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
 			 bool statb, cpVect v1, cpVect v2)
 {
     objx = makenode(objx);
-    objx->kind = S_LSEG;
+    objx->geom = S_LSEG;
 
     if (statb) {
 	objx->s = cpSegmentShapeNew(space->staticBody, v1, v2, 0);
@@ -210,6 +220,7 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
     cpShapeSetElasticity(objx->s, 0.7f);
     objx->c1 = setcolor(1, 0, 0, 1);
     objx->c2 = setcolor(0, 0, 0, 0);
+    objx->s->collision_type = C_NONE;
 
     return objx;
 }
@@ -248,6 +259,8 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
     cpBodySetAngVel(objx->b, 10);
     objx->c1 = setcolor(0.125, 0.125, 0.125, 0.5);
     objx->c2 = setcolor(0.5, 0.5, 0.5, 0.5);
+
+    cpShapeSetLayers(objx->s, BHOLE);
 
     return objx;
 }
@@ -341,9 +354,9 @@ bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
 
     while ((objch = objch->prev)) {
 
-	if (objch->kind == S_CIRC || objch->kind == S_POLY)
+	if (objch->geom == S_CIRC || objch->geom == S_POLY)
 	    dist = cpvlength(cpvsub(rvect, cpBodyGetPos(objch->b)));
-	else if (objch->kind == S_LSEG) {
+	else if (objch->geom == S_LSEG) {
 	    cpVect enda, endb, segv, posv;
 	    cpFloat angle;
 
@@ -384,13 +397,15 @@ struct objnode *makenode(struct objnode *objx)
     objnew->prev = objx;
     objx->next = objnew;
 
-    objnew->kind = S_NONE;
+    objnew->geom = S_NONE;
     objnew->bhole = false;
     objnew->b = NULL;
     objnew->s = NULL;
     objnew->width = 0;
     objnew->c1 = setcolor(0, 0, 0, 1);
     objnew->c2 = setcolor(1, 1, 1, 1);
+    objnew->cstatus = 0;
+    curtime(&objnew->lasthit);
 
     return objnew;
 }

@@ -18,8 +18,8 @@
 #include "spacedolphin.h"
 
 struct objnode objroot[1] =
-    { {S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, NULL,
-       NULL}
+    { {S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 0,
+	  {0, 0}, NULL, NULL}
 };
 
 

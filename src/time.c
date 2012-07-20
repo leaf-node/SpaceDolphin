@@ -33,7 +33,7 @@ void framerate(long simtime, double *simrate, int *fps)
     if (markt.tv_sec == 0 && markt.tv_nsec == 0)
 	markt = now;
     else {
-	frmtime = tdiff(now, markt);
+	frmtime = convtns(tdiff(now, markt));
 	markt = now;
 
 	simtimes[i] = simtime;
@@ -70,7 +70,7 @@ long timebal(void)
     if (markt.tv_sec == 0 && markt.tv_nsec == 0)
 	markt = marktbeforeidle = now;
 
-    calctime = tdiff(now, markt);
+    calctime = convtns(tdiff(now, markt));
     marktbeforeidle = now;
 
     waitt = MINFT - calctime - waitdiff;
@@ -81,7 +81,7 @@ long timebal(void)
     waitns(waitt);
     curtime(&markt);
 
-    truewaitt = tdiff(markt, marktbeforeidle);
+    truewaitt = convtns(tdiff(markt, marktbeforeidle));
     if (waitdiff == 0)
 	waitdiff = truewaitt - waitt;
     else
@@ -102,16 +102,23 @@ void waitns(long ns)
 
     if (ns <= 0)
 	return;
-    convtns(ns, &t);
+    convttp(ns, &t);
     if (nanosleep(&t, NULL) != 0)
 	printf("*** nanosleep error ***\n");
 }
 
 // convert nanoseconds into a struct used by nanosleep
-void convtns(long ns, struct timespec *tp)
+void convttp(long ns, struct timespec *tp)
 {
     tp->tv_sec  = ns / (long) 1e9;
     tp->tv_nsec = ns % (long) 1e9;
+}
+
+// convert timespec struct into nanoseconds. beware of overflow on 32 bit
+// machines.
+long convtns(struct timespec tp)
+{
+    return tp.tv_sec * 1e9 + tp.tv_nsec;
 }
 
 // get current monotinic time in nanoseconds
@@ -120,15 +127,21 @@ void curtime(struct timespec *tp)
     clock_gettime(CLOCK_MONOTONIC, tp);
 }
 
-// returns the time delta in nanoseconds between two points
-long tdiff(struct timespec tp0, struct timespec tp1)
+// returns the delta between two times
+struct timespec tdiff(struct timespec tp0, struct timespec tp1)
 {
-    long dsec, dnsec;
+    struct timespec dtp;
 
-    dsec = tp0.tv_sec - tp1.tv_sec;
-    dnsec = tp0.tv_nsec - tp1.tv_nsec;
+    dtp.tv_sec = tp0.tv_sec - tp1.tv_sec;
 
-    return dsec * 1e9 + dnsec;
+    if (tp0.tv_nsec >= tp1.tv_nsec)
+	dtp.tv_nsec = tp0.tv_nsec - tp1.tv_nsec;
+    else {
+	dtp.tv_sec--;
+	dtp.tv_nsec = 1e9 + tp0.tv_nsec - tp1.tv_nsec;
+    }
+
+    return dtp;
 
 }
 

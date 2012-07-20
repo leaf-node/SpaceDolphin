@@ -137,7 +137,7 @@ void blastengines(struct objnode *vehicle, struct movement *direct)
     }
 
     curtime(&now);
-    dt = tdiff(now, markt);
+    dt = convtns(tdiff(now, markt));
     markt = now;
 
     tforce = 0;
