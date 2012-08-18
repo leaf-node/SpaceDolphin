@@ -24,6 +24,7 @@
 #include <cairo/cairo.h>
 #include <chipmunk.h>
 
+enum player { P_NONE, P_ONE, P_TWO, P_THREE, P_FOUR };
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
 enum collide { C_NONE, C_SHIP, C_COLOR };
 
@@ -31,8 +32,30 @@ struct color_rgba {
     float r, g, b, a;
 };
 
+// struct of force and torque vectors
+struct forces {
+    cpVect force;
+    cpVect tforce;
+};
+
+// remembers which key presses/forces are active for a player
+struct movement {
+    struct forces prevf;
+    struct timespec markt;
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+    bool cw;
+    cpFloat cwt;
+    bool ccw;
+    cpFloat ccwt;
+};
+
 // linked list node to keep track of objects for drawing and querying
 struct objnode {
+    int player;
+    struct movement *pmove;
     int geom;
     int bhole;
     cpBody *b;
@@ -93,7 +116,7 @@ SDL_Surface *togglefullscreen(void);
 
 // move.c
 void interact(cpSpace * space, struct objnode *objroot,
-	      struct objnode *vehicle, SDL_Surface ** screen);
+	      SDL_Surface ** screen);
 void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 
@@ -107,7 +130,7 @@ void curtime(struct timespec *tp);
 struct timespec tdiff(struct timespec tp0, struct timespec tp1);
 
 // shape.c
-cpSpace *makeshapes(struct objnode *objx, struct objnode **vehicle);
+cpSpace *makeshapes(struct objnode *objx);
 struct color_rgba setcolor(float r, float g, float b, float a);
 void rmobj(struct objnode *objx);
 void rmobjs(struct objnode *objroot);

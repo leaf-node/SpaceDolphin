@@ -18,8 +18,8 @@
 #include "spacedolphin.h"
 
 struct objnode objroot[1] =
-    { {S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 0,
-	  {0, 0}, NULL, NULL}
+    { {P_NONE, S_NONE, NULL, false, NULL, NULL, 0, {0, 0, 0, 0},
+	  {0, 0, 0, 0}, 0, {0, 0}, NULL, NULL}
 };
 
 
@@ -30,10 +30,9 @@ int main(void)
     cairo_t *cr;
 
     cpSpace *space;
-    struct objnode *vehicle;
 
     graphicsinit(&screen, &sdlbuff, &surface, &cr);
-    space = makeshapes(objroot, &vehicle);
+    space = makeshapes(objroot);
 
 
     long t = 0, simtime = 0, acc = 0;
@@ -41,7 +40,7 @@ int main(void)
 
 	simtime = drawshapes(screen, sdlbuff, cr, objroot);
 
-	interact(space, objroot, vehicle, &screen);
+	interact(space, objroot, &screen);
 
 	for (acc += simtime; acc > DT; acc -= DT, t += DT)
 	    cpSpaceStep(space, (double) DT / 1e9);

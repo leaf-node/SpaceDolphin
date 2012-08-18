@@ -17,55 +17,59 @@
 
 #include "spacedolphin.h"
 
-enum { OFF, UP, DOWN, LEFT, RIGHT, R_LEFT, R_RIGHT };
-
-// remembers which key presses/forces are active
-struct movement {
-    bool up;
-    bool down;
-    bool left;
-    bool right;
-    bool cw;
-    cpFloat cwt;
-    bool ccw;
-    cpFloat ccwt;
-};
-
-// forces from previous calculation
-struct forces {
-    cpVect force;
-    cpVect tforce;
-};
-
-
-void blastengines(struct objnode *vehicle, struct movement *direct);
-void applyforces(struct objnode *vehicle, struct forces f);
+void blastengines(struct objnode *player);
+void applyforces(struct objnode *player, struct forces f);
+struct objnode *findplayer(struct objnode *objroot, int playernum);
+void initpmove(struct objnode *player);
 
 
 // query for button press change, then call applyforces()
 void interact(cpSpace * space, struct objnode *objroot,
-	      struct objnode *vehicle, SDL_Surface ** screen)
+	      SDL_Surface ** screen)
 {
     SDL_Event event;
     bool togglefsm = false;
-    static struct movement direct[1] =
-	{ {false, false, false, false, false, 0, false, 0} };
+    struct objnode *player1, *player2;
+
+    player1 = findplayer(objroot, P_ONE);
+    if (player1->pmove == NULL)
+	initpmove(player1);
+
+    player2 = findplayer(objroot, P_TWO);
+    if (player2->pmove == NULL)
+	initpmove(player2);
+
     while (SDL_PollEvent(&event)) {
 	switch (event.type) {
 	case SDL_KEYDOWN:
 	    switch (event.key.keysym.sym) {
+
 	    case SDLK_UP:
-		direct->up = true;
+		player1->pmove->up = true;
 		break;
 	    case SDLK_DOWN:
-		direct->down = true;
+		player1->pmove->down = true;
 		break;
 	    case SDLK_LEFT:
-		direct->ccw = true;
+		player1->pmove->ccw = true;
 		break;
 	    case SDLK_RIGHT:
-		direct->cw = true;
+		player1->pmove->cw = true;
 		break;
+
+	    case SDLK_w:
+		player2->pmove->up = true;
+		break;
+	    case SDLK_s:
+		player2->pmove->down = true;
+		break;
+	    case SDLK_a:
+		player2->pmove->ccw = true;
+		break;
+	    case SDLK_d:
+		player2->pmove->cw = true;
+		break;
+
 	    case SDLK_f:
 		togglefsm = true;
 		break;
@@ -81,18 +85,33 @@ void interact(cpSpace * space, struct objnode *objroot,
 	    break;
 	case SDL_KEYUP:
 	    switch (event.key.keysym.sym) {
+
 	    case SDLK_UP:
-		direct->up = false;
+		player1->pmove->up = false;
 		break;
 	    case SDLK_DOWN:
-		direct->down = false;
+		player1->pmove->down = false;
 		break;
 	    case SDLK_LEFT:
-		direct->ccw = false;
+		player1->pmove->ccw = false;
 		break;
 	    case SDLK_RIGHT:
-		direct->cw = false;
+		player1->pmove->cw = false;
 		break;
+
+	    case SDLK_w:
+		player2->pmove->up = false;
+		break;
+	    case SDLK_s:
+		player2->pmove->down = false;
+		break;
+	    case SDLK_a:
+		player2->pmove->ccw = false;
+		break;
+	    case SDLK_d:
+		player2->pmove->cw = false;
+		break;
+
 	    default:
 		break;
 	    }
@@ -107,7 +126,8 @@ void interact(cpSpace * space, struct objnode *objroot,
 	}
     }
 
-    blastengines(vehicle, direct);
+    blastengines(player1);
+    blastengines(player2);
 
     if (togglefsm == true)
 	*screen = togglefullscreen();
@@ -116,74 +136,75 @@ void interact(cpSpace * space, struct objnode *objroot,
 
 // calculates and adds forces triggered by holding the movement keys down
 // it also has to stop the forces applied from the prev call to this function
-void blastengines(struct objnode *vehicle, struct movement *direct)
+void blastengines(struct objnode *player)
 {
+    struct movement *pmove;
     cpFloat force = 0, tforce = 0;
-    static struct forces prevf = { {0, 0}, {0, 0} };
     struct forces newf;
-    cpVect rotv = cpBodyGetRot(vehicle->b);
+    cpVect rotv = cpBodyGetRot(player->b);
     cpFloat angvel;
     long dt;
     struct timespec now;
-    static struct timespec markt;
+
+    pmove = player->pmove;
 
     // these test cases are to enforce soft limits on the rate of movement
-    if (direct->up && !direct->down) {
-	if (cpvunrotate(cpBodyGetVel(vehicle->b), rotv).y < MAXVEL)
+    if (pmove->up && !pmove->down) {
+	if (cpvunrotate(cpBodyGetVel(player->b), rotv).y < MAXVEL)
 	    force = FORCE;
-    } else if (!direct->up && direct->down) {
-	if (cpvunrotate(cpBodyGetVel(vehicle->b), rotv).y > -MAXVEL)
+    } else if (!pmove->up && pmove->down) {
+	if (cpvunrotate(cpBodyGetVel(player->b), rotv).y > -MAXVEL)
 	    force = -FORCE;
     }
 
     curtime(&now);
-    dt = convtns(tdiff(now, markt));
-    markt = now;
+    dt = convtns(tdiff(now, player->pmove->markt));
+    player->pmove->markt = now;
 
     tforce = 0;
-    angvel = cpBodyGetAngVel(vehicle->b);
-    if (direct->ccw) {
-	direct->ccwt += dt;
-	direct->ccwt =
-	    (direct->ccwt > TORQRAMPT) ? TORQRAMPT : direct->ccwt;
+    angvel = cpBodyGetAngVel(player->b);
+    if (pmove->ccw) {
+	pmove->ccwt += dt;
+	pmove->ccwt =
+	    (pmove->ccwt > TORQRAMPT) ? TORQRAMPT : pmove->ccwt;
 
 	if (angvel < MAXANGVEL)
-	    tforce += TFORCE * sqrtl(direct->ccwt / TORQRAMPT);
-    } else if (direct->ccwt > 0) {
-	direct->ccwt -= dt;
-	direct->ccwt = (direct->ccwt < 0) ? 0 : direct->ccwt;
+	    tforce += TFORCE * sqrtl(pmove->ccwt / TORQRAMPT);
+    } else if (pmove->ccwt > 0) {
+	pmove->ccwt -= dt;
+	pmove->ccwt = (pmove->ccwt < 0) ? 0 : pmove->ccwt;
     }
 
-    if (direct->cw) {
-	direct->cwt += dt;
-	direct->cwt = (direct->cwt > TORQRAMPT) ? TORQRAMPT : direct->cwt;
+    if (pmove->cw) {
+	pmove->cwt += dt;
+	pmove->cwt = (pmove->cwt > TORQRAMPT) ? TORQRAMPT : pmove->cwt;
 
 	if (angvel > -MAXANGVEL)
-	    tforce += -TFORCE * sqrtl(direct->cwt / TORQRAMPT);
-    } else if (direct->cwt > 0) {
-	direct->cwt -= dt;
-	direct->cwt = (direct->cwt < 0) ? 0 : direct->cwt;
+	    tforce += -TFORCE * sqrtl(pmove->cwt / TORQRAMPT);
+    } else if (pmove->cwt > 0) {
+	pmove->cwt -= dt;
+	pmove->cwt = (pmove->cwt < 0) ? 0 : pmove->cwt;
     }
 
     newf.force = cpvrotate(cpv(0, force), rotv);
     newf.tforce = cpv(0, tforce);
 
-    applyforces(vehicle, prevf);
-    applyforces(vehicle, newf);
+    applyforces(player, pmove->prevf);
+    applyforces(player, newf);
 
-    prevf.force = cpvneg(newf.force);
-    prevf.tforce = cpvneg(newf.tforce);
+    pmove->prevf.force = cpvneg(newf.force);
+    pmove->prevf.tforce = cpvneg(newf.tforce);
 }
 
 // apply a lasting external force to the center of gravity
 // apply lasting forces perpendicluar to vectors from the c.o.g.
 // (in other words, push and rotate the object)
 // these need to be subtracted later to stop their effect
-void applyforces(struct objnode *vehicle, struct forces f)
+void applyforces(struct objnode *player, struct forces f)
 {
-    cpBodyApplyForce(vehicle->b, f.force, cpvzero);
-    cpBodyApplyForce(vehicle->b, f.tforce, cpv(RLEN, 0));
-    cpBodyApplyForce(vehicle->b, cpvneg(f.tforce), cpv(-RLEN, 0));
+    cpBodyApplyForce(player->b, f.force, cpvzero);
+    cpBodyApplyForce(player->b, f.tforce, cpv(RLEN, 0));
+    cpBodyApplyForce(player->b, cpvneg(f.tforce), cpv(-RLEN, 0));
 }
 
 // make no changes to a body's movement
@@ -222,3 +243,39 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 	}
     }
 }
+
+// finds the specified player in the linked list of objects.
+struct objnode *findplayer(struct objnode *objroot, int playernum)
+{
+    struct objnode *objx;
+
+    for (objx = objroot; objx != NULL; objx = objx->next)
+	if (objx->player == playernum)
+	    return objx;
+
+    fprintf(stderr, "*** Error, could not find player %d\n", playernum);
+    exit(5);
+
+}
+
+// initializes player to not be adding any additional force.
+void initpmove(struct objnode *player)
+{
+    player->pmove = malloc(sizeof(struct movement));
+
+    player->pmove->prevf.force = cpvzero;
+    player->pmove->prevf.tforce = cpvzero;
+    player->pmove->markt.tv_sec = 0;
+    player->pmove->markt.tv_nsec = 0;
+
+    player->pmove->up = false;
+    player->pmove->down = false;
+    player->pmove->left = false;
+    player->pmove->right = false;
+    player->pmove->cw = false;
+    player->pmove->cw = 0;
+    player->pmove->ccw = false;
+    player->pmove->ccwt = 0;
+
+}
+

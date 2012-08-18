@@ -28,6 +28,7 @@ void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randfit(struct objnode *objx, cpFloat r);
 cpFloat randrange(cpFloat min, cpFloat max);
 bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
+void giverandspin(struct objnode *objx);
 
 struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
 			 cpFloat mass, cpFloat radius, cpVect pos);
@@ -43,13 +44,15 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 			  cpFloat mass, cpFloat radius, cpVect pos);
 struct objnode *makerect(struct objnode *objx, cpSpace * space,
 			 cpFloat mass, cpFloat width, cpVect pos);
+struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
+			   int playernum);
 struct objnode *maketria(struct objnode *objx, cpSpace * space,
 			 cpFloat mass, cpFloat len, cpFloat width,
 			 cpVect pos);
 
 
 // initialize a space and then add a whole bunch of shapes and boundaries
-cpSpace *makeshapes(struct objnode *objroot, struct objnode **vehicle)
+cpSpace *makeshapes(struct objnode *objroot)
 {
     int i;
     struct timespec time;
@@ -63,6 +66,8 @@ cpSpace *makeshapes(struct objnode *objroot, struct objnode **vehicle)
     objx = objroot;
 
 /* boundaries for the game... */
+
+    /*
     cpVect fwedgeverts[4] = { cpv(XMIN - 1, YMIN - 1),
 	cpv(XMIN - 1, YMIN + 11),
 	cpv(XMAX / 2 - 20, YMIN + 11),
@@ -77,8 +82,14 @@ cpSpace *makeshapes(struct objnode *objroot, struct objnode **vehicle)
 		    cpv(XMAX, YMIN + 1));
     objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
 		    cpv(XMAX, YMAX - 1));
+    */
+    objx = makeline(objx, space, true, cpv(XMIN, YMIN + 1),
+		    cpv(XMAX, YMIN + 1));
+    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
+		    cpv(XMAX, YMAX - 1));
+
     objx = makeline(objx, space, true, cpv(XMIN + 1, YMAX),
-		    cpv(XMIN + 1, YMIN + 10));
+		    cpv(XMIN + 1, YMIN));
     objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
 		    cpv(XMAX - 1, YMIN));
 
@@ -91,33 +102,34 @@ cpSpace *makeshapes(struct objnode *objroot, struct objnode **vehicle)
     objx = makebhole(objx, space, 0.25, 5, cpv(40, 80));
 
     objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
-    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx->s->collision_type = C_COLOR;
+    giverandspin(objx);
     objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
-    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx->s->collision_type = C_COLOR;
+    giverandspin(objx);
 
-    // the "vehicle" is the object that is controlled by the keyboard
-    objx = *vehicle = maketria(objx, space, 1.33, 20, 8, cpv(40, 20));
-    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
-    objx->s->collision_type = C_SHIP;
-    objx->c1 = setcolor(0.5, 0, 1, 1);
-    objx->c2 = setcolor(1, 0, 0, 1);
+    // create player one
+    objx = makeplayer(objx, space, P_ONE);
+    giverandspin(objx);
+
+    // create player two
+    objx = makeplayer(objx, space, P_TWO);
+    giverandspin(objx);
 
     objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
-    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
     objx->s->collision_type = C_COLOR;
+    giverandspin(objx);
 
 
 /* randomly placed objects... */
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
-	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 	objx->s->collision_type = C_COLOR;
+	giverandspin(objx);
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
-	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+	giverandspin(objx);
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
-	cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
+	giverandspin(objx);
     }
 
     cpSpaceAddCollisionHandler(space, C_SHIP, C_COLOR, NULL, *chcolor, \
@@ -265,6 +277,19 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
     return objx;
 }
 
+// make a ship for player number playernum
+struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
+	int playernum)
+{
+    objx = maketria(objx, space, 1.33, 20, 8, randfit(objx, 10));
+    objx->c1 = setcolor(0.5, 0, 1, 1);
+    objx->c2 = setcolor(1, 0, 0, 1);
+    objx->s->collision_type = C_SHIP;
+
+    objx->player = playernum;
+
+    return objx;
+}
 
 // makes a triangle...
 struct objnode *maketria(struct objnode *objx, cpSpace * space,
@@ -301,6 +326,12 @@ struct objnode *makerect(struct objnode *objx, cpSpace * space,
     objx = makepoly(objx, space, false, mass, 4, verts, pos);
 
     return objx;
+}
+
+// sets the object spinning
+void giverandspin(struct objnode *objx)
+{
+    cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 }
 
 // returns a structure to store an object's color
@@ -397,6 +428,8 @@ struct objnode *makenode(struct objnode *objx)
     objnew->prev = objx;
     objx->next = objnew;
 
+    objnew->player = P_NONE;
+    objnew->pmove = NULL;
     objnew->geom = S_NONE;
     objnew->bhole = false;
     objnew->b = NULL;
