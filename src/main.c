@@ -18,7 +18,7 @@
 #include "spacedolphin.h"
 
 struct objnode objroot[1] =
-    { {P_NONE, S_NONE, NULL, false, NULL, NULL, 0, {0, 0, 0, 0},
+    { {P_NONE, NULL, S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0},
 	  {0, 0, 0, 0}, 0, {0, 0}, NULL, NULL}
 };
 

@@ -66,23 +66,6 @@ cpSpace *makeshapes(struct objnode *objroot)
     objx = objroot;
 
 /* boundaries for the game... */
-
-    /*
-    cpVect fwedgeverts[4] = { cpv(XMIN - 1, YMIN - 1),
-	cpv(XMIN - 1, YMIN + 11),
-	cpv(XMAX / 2 - 20, YMIN + 11),
-	cpv(XMAX / 2 + 28, YMIN - 1)
-    };
-    objx = makepoly(objx, space, true, 1, 4, fwedgeverts, cpvzero);
-    cpShapeSetLayers(objx->s, ~((cpLayers) 0));	// override default layers
-    objx->c1 = setcolor(0, 0, 0, 0);	//invisible body
-    objx->c2 = setcolor(1, 0, 0, 1);
-
-    objx = makeline(objx, space, true, cpv(XMAX / 2 + 19, YMIN + 1),
-		    cpv(XMAX, YMIN + 1));
-    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
-		    cpv(XMAX, YMAX - 1));
-    */
     objx = makeline(objx, space, true, cpv(XMIN, YMIN + 1),
 		    cpv(XMAX, YMIN + 1));
     objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
@@ -102,10 +85,10 @@ cpSpace *makeshapes(struct objnode *objroot)
     objx = makebhole(objx, space, 0.25, 5, cpv(40, 80));
 
     objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
-    objx->s->collision_type = C_COLOR;
+    objx->s->collision_type = C_LARGE;
     giverandspin(objx);
     objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
-    objx->s->collision_type = C_COLOR;
+    objx->s->collision_type = C_LARGE;
     giverandspin(objx);
 
     // create player one
@@ -114,17 +97,18 @@ cpSpace *makeshapes(struct objnode *objroot)
 
     // create player two
     objx = makeplayer(objx, space, P_TWO);
+    objx->c1 = setcolor(.75, 0.5, 0, 1);
     giverandspin(objx);
 
     objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
-    objx->s->collision_type = C_COLOR;
+    objx->s->collision_type = C_LARGE;
     giverandspin(objx);
 
 
 /* randomly placed objects... */
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
-	objx->s->collision_type = C_COLOR;
+	objx->s->collision_type = C_LARGE;
 	giverandspin(objx);
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	giverandspin(objx);
@@ -132,7 +116,11 @@ cpSpace *makeshapes(struct objnode *objroot)
 	giverandspin(objx);
     }
 
-    cpSpaceAddCollisionHandler(space, C_SHIP, C_COLOR, NULL, *chcolor, \
+    cpSpaceAddCollisionHandler(space, C_SHIP, C_LARGE, NULL, *chcolor, \
+	NULL, NULL, objroot);
+    cpSpaceAddCollisionHandler(space, C_LARGE, C_SMALL, NULL, *chcolor, \
+	NULL, NULL, objroot);
+    cpSpaceAddCollisionHandler(space, C_SMALL, C_SHIP, NULL, *chcolor, \
 	NULL, NULL, objroot);
 
     return space;
@@ -165,8 +153,8 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     cpBodySetAngVel(objx->b, 20);
     cpShapeSetFriction(objx->s, 0.7);
     cpShapeSetElasticity(objx->s, 0.7f);
-    objx->c1 = setcolor(0, 0, 1, 1);
-    objx->c2 = setcolor(0.5, 0.5, 0.5, 1);
+    objx->c1 = setcolor(0.25, 0.25, 0.25, 1);
+    objx->c2 = setcolor(0.75, 0.75, 0.75, 1);
     objx->s->collision_type = C_NONE;
 
     return objx;
@@ -203,8 +191,8 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 
     cpShapeSetFriction(objx->s, 0.7f);
     cpShapeSetElasticity(objx->s, 0.4f);
-    objx->c1 = setcolor(0, 0, 1, 1);
-    objx->c2 = setcolor(0.5, 0.5, 0.5, 1);
+    objx->c1 = setcolor(0.25, 0.25, 0.25, 1);
+    objx->c2 = setcolor(0.75, 0.75, 0.75, 1);
     objx->s->collision_type = C_NONE;
 
     return objx;
@@ -247,9 +235,10 @@ struct objnode *makefloat(struct objnode *objx, cpSpace * space,
 
     objx->b->velocity_func = &orbit;
     cpShapeSetGroup(objx->s, FLOATG);
+    objx->s->collision_type = C_SMALL;
 
     cpBodySetAngVel(objx->b, 2);
-    objx->c1 = setcolor(1, 0.5, 0, 0.625);
+    objx->c1 = setcolor(0, 0, 0, 0.625);
     objx->c2 = setcolor(1, 0, 0, 0.625);
 
     return objx;

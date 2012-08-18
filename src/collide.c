@@ -19,17 +19,16 @@
 
 // handle collision between objects previously chosen by
 // cpSpaceAddCollisionHandler()
-// chcolor changes the color of C_COLOR objects touched by the C_SHIP.
+// chcolor changes the color of C_LARGE objects touched by the C_SHIP.
 int chcolor (cpArbiter *arb, cpSpace *space, void *data)
 {
     struct objnode *obja, *objb, *objx;
     cpShape *sa, *sb;
-    struct timespec now, dt;
 
     cpArbiterGetShapes(arb, &sa, &sb);
 
     obja = objb = NULL;
-    for (objx = (struct objnode *) data; objx->next != NULL; \
+    for (objx = (struct objnode *) data; objx != NULL; \
 	    objx = objx->next)
     {
 	if (objx->s == sa)
@@ -39,36 +38,57 @@ int chcolor (cpArbiter *arb, cpSpace *space, void *data)
     }
 
     if (obja == NULL || objb == NULL) {
-	fprintf(stderr, "*** warning: couldn't find object during" \
+	fprintf(stderr, "*** warning: couldn't find object during " \
 		"collision callback!\n");
 	return true;
     }
 
-    curtime(&now);
-    dt = tdiff(now, objb->lasthit);
-
-    if ((dt.tv_sec >= 1) || (convtns(dt) > 0.25 * 1e9))
-    {
-    	switch (objb->cstatus) {
-	case 0:
-	    objb->cstatus++;
-	    objb->c1 = setcolor(0.85, 0, 0, 1);
-	    break;
-	case 1:
-	    objb->cstatus++;
-	    objb->c1 = setcolor(0, 0.85, 0, 1);
-	    break;
-	case 2:
-	    objb->cstatus = 0;
-	    objb->c1 = setcolor(0, 0, 1, 1);
-
-	    break;
+    // ship hits large object
+    if (obja->s->collision_type == C_SHIP \
+	    && objb->s->collision_type == C_LARGE) {
+	if (obja->player == P_ONE) {
+	    objb->c1 = setcolor(0.5, 0, 1, 1);
+	    objb->cstatus = P_ONE;
 	}
-
-	objb->lasthit = now;
+	else if (obja->player == P_TWO) {
+	    objb->c1 = setcolor(.75, 0.5, 0, 1);
+	    objb->cstatus = P_TWO;
+	}
+    }
+    // large object hits small object
+    else if (obja->s->collision_type == C_LARGE \
+	    && objb->s->collision_type == C_SMALL) {
+	if (obja->cstatus == P_ONE) {
+	    objb->c1 = setcolor(0, 0, 1, 1);
+	    objb->cstatus = P_ONE;
+	}
+	else if (obja->cstatus == P_TWO) {
+	    objb->c1 = setcolor(1, 0, 0, 1);
+	    objb->cstatus = P_TWO;
+	}
+    }
+    // small object hits ship
+    else if (obja->s->collision_type == C_SMALL \
+	    && objb->s->collision_type == C_SHIP) {
+	if (obja->cstatus == P_ONE \
+		&& objb->player == P_TWO) {
+	    // insert player two health reduction here
+	    obja->c1 = setcolor(0, 0, 0, 0.625);
+	    obja->c2 = setcolor(1, 0, 0, 0.625);
+	}
+	else if (obja->cstatus == P_TWO \
+		&& objb->player == P_ONE) {
+	    // insert player one health reduction here
+	    obja->c1 = setcolor(0, 0, 0, 0.625);
+	    obja->c2 = setcolor(1, 0, 0, 0.625);
+	}
+    }
+    // this shouldn't happen
+    else {
+	fprintf(stderr, "*** warning: unknown collision type\n");
+	return true;
     }
 
     return true;
 }
-
 

@@ -26,7 +26,7 @@
 
 enum player { P_NONE, P_ONE, P_TWO, P_THREE, P_FOUR };
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
-enum collide { C_NONE, C_SHIP, C_COLOR };
+enum collide { C_NONE, C_SHIP, C_LARGE, C_SMALL };
 
 struct color_rgba {
     float r, g, b, a;
