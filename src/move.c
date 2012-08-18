@@ -158,8 +158,8 @@ void blastengines(struct objnode *player)
     }
 
     curtime(&now);
-    dt = convtns(tdiff(now, player->pmove->markt));
-    player->pmove->markt = now;
+    dt = convtns(tdiff(now, pmove->markt));
+    pmove->markt = now;
 
     tforce = 0;
     angvel = cpBodyGetAngVel(player->b);
@@ -273,7 +273,7 @@ void initpmove(struct objnode *player)
     player->pmove->left = false;
     player->pmove->right = false;
     player->pmove->cw = false;
-    player->pmove->cw = 0;
+    player->pmove->cwt = 0;
     player->pmove->ccw = false;
     player->pmove->ccwt = 0;
 
