@@ -16,7 +16,8 @@ To play the game, run this:
     ./spacedolphin
 
 
-Control your flight with the arrow keys to knock objects around the screen.
+Player 1 controls flight with the arrow keys.
+Player 2 controls flight with the W A S D keys.
 
 To toggle fullscreen mode, press the 'f' key.
 
