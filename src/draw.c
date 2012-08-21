@@ -63,21 +63,23 @@ void drawcirc(cairo_t * cr, struct objnode *objx)
 {
     cpFloat radius;
     cpVect pos, radiusv;
+    struct colorset *colors;
 
     pos = cpBodyGetPos(objx->b);
     radius = cpCircleShapeGetRadius(objx->s);
     radiusv = cpvmult(cpvforangle(cpBodyGetAngle(objx->b)),
 		      cpCircleShapeGetRadius(objx->s));
+    colors = findcolors(objx->colortype, objx->ownedby);
 
     cairo_arc(cr, pos.x, pos.y, radius, 0, 2 * M_PI);
 
-    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
-			  objx->c1.a);
+    cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
+	    colors->c1.b, colors->c1.a);
     cairo_fill_preserve(cr);
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
-    cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
-			  objx->c2.a);
+    cairo_set_source_rgba(cr, colors->c2.r, colors->c2.g,
+	    colors->c2.b, colors->c2.a);
     cairo_stroke(cr);
 
     cairo_move_to(cr, pos.x, pos.y);
@@ -90,16 +92,18 @@ void drawcirc(cairo_t * cr, struct objnode *objx)
 void drawlseg(cairo_t * cr, struct objnode *objx)
 {
     cpVect enda, endb;
+    struct colorset *colors;
 
     enda = cpSegmentShapeGetA(objx->s);
     endb = cpSegmentShapeGetB(objx->s);
+    colors = findcolors(objx->colortype, objx->ownedby);
 
     cairo_move_to(cr, enda.x, enda.y);
     cairo_line_to(cr, endb.x, endb.y);
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
-    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
-			  objx->c1.a);
+    cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
+	    colors->c1.b, colors->c1.a);
     cairo_stroke(cr);
 
 }
@@ -109,10 +113,12 @@ void drawpoly(cairo_t * cr, struct objnode *objx)
 {
     int i, numv;
     cpVect pos, rotv, vert;
+    struct colorset *colors;
 
     pos = cpBodyGetPos(objx->b);
     rotv = cpBodyGetRot(objx->b);
     numv = cpPolyShapeGetNumVerts(objx->s);
+    colors = findcolors(objx->colortype, objx->ownedby);
 
     for (i = 0; i < numv; i++) {
 	vert =
@@ -126,18 +132,18 @@ void drawpoly(cairo_t * cr, struct objnode *objx)
 
     cairo_close_path(cr);
 
-    cairo_set_source_rgba(cr, objx->c1.r, objx->c1.g, objx->c1.b,
-			  objx->c1.a);
+    cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
+	    colors->c1.b, colors->c1.a);
     cairo_fill_preserve(cr);
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
-    cairo_set_source_rgba(cr, objx->c2.r, objx->c2.g, objx->c2.b,
-			  objx->c2.a);
+    cairo_set_source_rgba(cr, colors->c2.r, colors->c2.g,
+	    colors->c2.b, colors->c2.a);
     cairo_stroke(cr);
 
 }
 
-// draws frames per second on surface (converts from simulation time)
+// draws frames per second and simulation time on surface
 void drawfps(cairo_t * cr, long simtime)
 {
     int fps;

@@ -18,8 +18,10 @@
 #include "spacedolphin.h"
 
 // handle collision between objects previously chosen by
-// cpSpaceAddCollisionHandler()
-// chcolor changes the color of C_LARGE objects touched by the C_SHIP.
+// cpSpaceAddCollisionHandler(). chcolor changes the the owner (and by extension
+// the color) of C_LARGE objects touched by the C_SHIP, C_SMALL objects touched
+// by C_LARGE objects, and C_SMALL objects that touch C_SHIP objects.
+// it also handles hitpoint reduction.
 int chcolor (cpArbiter *arb, cpSpace *space, void *data)
 {
     struct objnode *obja, *objb, *objx;
@@ -46,41 +48,22 @@ int chcolor (cpArbiter *arb, cpSpace *space, void *data)
     // ship hits large object
     if (obja->s->collision_type == C_SHIP \
 	    && objb->s->collision_type == C_LARGE) {
-	if (obja->player == P_ONE) {
-	    objb->c1 = setcolor(0.5, 0, 1, 1);
-	    objb->cstatus = P_ONE;
-	}
-	else if (obja->player == P_TWO) {
-	    objb->c1 = setcolor(.75, 0.5, 0, 1);
-	    objb->cstatus = P_TWO;
-	}
+
+	    objb->ownedby = obja->ownedby;
     }
     // large object hits small object
     else if (obja->s->collision_type == C_LARGE \
 	    && objb->s->collision_type == C_SMALL) {
-	if (obja->cstatus == P_ONE) {
-	    objb->c1 = setcolor(0, 0, 1, 1);
-	    objb->cstatus = P_ONE;
-	}
-	else if (obja->cstatus == P_TWO) {
-	    objb->c1 = setcolor(1, 0, 0, 1);
-	    objb->cstatus = P_TWO;
-	}
+
+	    objb->ownedby = obja->ownedby;
     }
     // small object hits ship
     else if (obja->s->collision_type == C_SMALL \
 	    && objb->s->collision_type == C_SHIP) {
-	if (obja->cstatus == P_ONE \
-		&& objb->player == P_TWO) {
-	    // insert player two health reduction here
-	    obja->c1 = setcolor(0, 0, 0, 0.625);
-	    obja->c2 = setcolor(1, 0, 0, 0.625);
-	}
-	else if (obja->cstatus == P_TWO \
-		&& objb->player == P_ONE) {
-	    // insert player one health reduction here
-	    obja->c1 = setcolor(0, 0, 0, 0.625);
-	    obja->c2 = setcolor(1, 0, 0, 0.625);
+
+	if (obja->ownedby != objb->ownedby) {
+	    objb->pinfo->hp -= 1;
+	    obja->ownedby = P_NONE;
 	}
     }
     // this shouldn't happen

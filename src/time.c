@@ -17,8 +17,8 @@
 
 #include "spacedolphin.h"
 
-// calculates the avg. fps and simulation speed once every NITER iterations
-// returns a simrate and fps of -1 for the first NITER+1 iterations
+// calculates the avg. fps and simulation rate once every NITER iterations
+// returns a simrate and fps of -1 for the first NITER iterations
 void framerate(long simtime, double *simrate, int *fps)
 {
     int j;

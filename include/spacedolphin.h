@@ -20,16 +20,28 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
+#include <search.h>
 #include <SDL/SDL.h>
 #include <cairo/cairo.h>
 #include <chipmunk.h>
 
-enum player { P_NONE, P_ONE, P_TWO, P_THREE, P_FOUR };
+enum players { P_NONE, P_ONE, P_TWO, P_THREE, P_FOUR };
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
-enum collide { C_NONE, C_SHIP, C_LARGE, C_SMALL };
+enum collidetype { C_NONE, C_SHIP, C_LARGE, C_SMALL };
+enum colors { COLOR_LARGE, COLOR_SMALL, COLOR_LINE, COLOR_SHIP, COLOR_BHOLE,
+    COLOR_NONE };
+enum sizes { HSIZE = sizeof(enum players) * sizeof(enum colors) * 2 };
+
 
 struct color_rgba {
     float r, g, b, a;
+};
+
+// contains two colors, one for fill, the other for border
+struct colorset {
+    struct color_rgba c1;
+    struct color_rgba c2;
 };
 
 // struct of force and torque vectors
@@ -40,8 +52,6 @@ struct forces {
 
 // remembers which key presses/forces are active for a player
 struct movement {
-    struct forces prevf;
-    struct timespec markt;
     bool up;
     bool down;
     bool left;
@@ -50,32 +60,38 @@ struct movement {
     cpFloat cwt;
     bool ccw;
     cpFloat ccwt;
+    struct forces prevf;
+    struct timespec markt;
 };
 
-// linked list node to keep track of objects for drawing and querying
+// basic player information
+struct playerinfo {
+    int hp;
+    struct movement thrust;
+};
+
+// linked list node to keep track of objects for drawing and accessing
 struct objnode {
-    int player;
-    struct movement *pmove;
-    int geom;
-    int bhole;
+    int geom; cpFloat radius;
     cpBody *b;
     cpShape *s;
-    cpFloat width;
-    struct color_rgba c1;
-    struct color_rgba c2;
-    int cstatus;
-    struct timespec lasthit;
+    bool bhole;
+    struct playerinfo *pinfo;
+    int ownedby;
+    int colortype;
     struct objnode *prev;
     struct objnode *next;
 };
 
-#define DEBUG	    false
+#define HPSTART	    30		// the hitpoints players start with
+
+#define DEBUG	    false	// print info about graphics mode
 #define SHOWFPS	    true	// show the fps if true
 #define FULLSCREEN  false	// is fullscreen mode the default?
 
 #define DURATION INFINITY	// max length of game in nanoseconds
 
-#define DT       5e5		// 5e5 nanoseconds: physics engine time step size
+#define DT       5e5		// 5e5 nanoseconds: phys engine time step size
 #define MAXFPS   60		// max frames per second
 #define MINFT    ((long) 1e9 / MAXFPS)	// min frame time
 #define MINFPS   20		// min frames per second
@@ -96,16 +112,16 @@ struct objnode {
 #define RDSQ	     10.0	// squared distance from BH to apply rep. force
 #define REPFS	    400.0	// scaled strength of replellant force
 
-#define XMAX        160.0
-#define XMIN          0.0
-#define YMAX        120.0
-#define YMIN          0.0
-#define XYBUF        20.0
+#define XMAX        160.0	// the higher width coordinate of the space
+#define XMIN          0.0	// the lower width coord ...
+#define YMAX        120.0	// the higher height coord ...
+#define YMIN          0.0	// the lower height coord ...
+#define XYBUF        20.0	// border not to put rand objects in
 
-#define SCALEF	      4.0
-#define LPIXW	      1.0
+#define SCALEF	      4.0	// scaling factor for choosing window size
+#define LPIXW	      1.0	// the pixel width of lines and borders
 
-#define PI   3.1415926535
+#define PI   3.1415926535	// just pi
 
 // draw.c
 void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
@@ -131,10 +147,14 @@ struct timespec tdiff(struct timespec tp0, struct timespec tp1);
 
 // shape.c
 cpSpace *makeshapes(struct objnode *objx);
-struct color_rgba setcolor(float r, float g, float b, float a);
 void rmobj(struct objnode *objx);
 void rmobjs(struct objnode *objroot);
 
 // collide.c
 int chcolor (cpArbiter *arb, cpSpace *space, void *data);
+
+// color.c
+void initcolors(void);
+struct colorset *findcolors(int colortype, int ownedby);
+void freeentries(void);
 

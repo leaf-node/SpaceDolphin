@@ -17,40 +17,47 @@
 
 #include "spacedolphin.h"
 
-struct objnode objroot[1] =
-    { {P_NONE, NULL, S_NONE, false, NULL, NULL, 0, {0, 0, 0, 0},
-	  {0, 0, 0, 0}, 0, {0, 0}, NULL, NULL}
-};
 
+struct objnode objroot[1] = {
+    { S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, NULL, NULL }
+};
 
 int main(void)
 {
     SDL_Surface *screen, *sdlbuff;
     cairo_surface_t *surface;
     cairo_t *cr;
+    long simtime, acc;
 
     cpSpace *space;
 
     graphicsinit(&screen, &sdlbuff, &surface, &cr);
+    initcolors();
     space = makeshapes(objroot);
 
 
-    long t = 0, simtime = 0, acc = 0;
-    while (t < DURATION) {
+    simtime = 0, acc = 0;
+    for (;;) {
 
 	simtime = drawshapes(screen, sdlbuff, cr, objroot);
 
+	// control movment of the ships
 	interact(space, objroot, &screen);
 
-	for (acc += simtime; acc > DT; acc -= DT, t += DT)
+	// simulate the amount of real time since the last simulation.
+	for (acc += simtime; acc > DT; acc -= DT)
 	    cpSpaceStep(space, (double) DT / 1e9);
 
     }
 
+    // clean up
     rmobjs(objroot);
     cpSpaceFree(space);
     cairo_surface_destroy(surface);
+    hdestroy();
+    freeentries();
     SDL_FreeSurface(sdlbuff);
 
     return 0;
 }
+

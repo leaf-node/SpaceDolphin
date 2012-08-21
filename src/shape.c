@@ -27,7 +27,7 @@ struct objnode *makenode(struct objnode *objx);
 void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randfit(struct objnode *objx, cpFloat r);
 cpFloat randrange(cpFloat min, cpFloat max);
-bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width);
+bool nearobjs(struct objnode *objlast, cpVect randv, cpFloat radius);
 void giverandspin(struct objnode *objx);
 
 struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
@@ -76,7 +76,7 @@ cpSpace *makeshapes(struct objnode *objroot)
     objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
 		    cpv(XMAX - 1, YMIN));
 
-    // needed before random intial velocities and placement
+    // needed before random intial velocities, placement and rotation
     curtime(&time);
     srandom(time.tv_nsec);
 
@@ -85,11 +85,15 @@ cpSpace *makeshapes(struct objnode *objroot)
     objx = makebhole(objx, space, 0.25, 5, cpv(40, 80));
 
     objx = makecirc(objx, space, false, 0.5, 10, cpv(120, 57));
-    objx->s->collision_type = C_LARGE;
     giverandspin(objx);
     objx = makecirc(objx, space, false, 0.15, 3, cpv(120, 45));
-    objx->s->collision_type = C_LARGE;
     giverandspin(objx);
+
+    objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
+    giverandspin(objx);
+
+
+/* randomly placed objects... */
 
     // create player one
     objx = makeplayer(objx, space, P_ONE);
@@ -97,18 +101,10 @@ cpSpace *makeshapes(struct objnode *objroot)
 
     // create player two
     objx = makeplayer(objx, space, P_TWO);
-    objx->c1 = setcolor(.75, 0.5, 0, 1);
     giverandspin(objx);
 
-    objx = makerect(objx, space, 0.25, 10, cpv(80, 20));
-    objx->s->collision_type = C_LARGE;
-    giverandspin(objx);
-
-
-/* randomly placed objects... */
     for (i = 0; i < 7; i++) {
 	objx = makecirc(objx, space, false, 0.25, 5, randfit(objx, 5));
-	objx->s->collision_type = C_LARGE;
 	giverandspin(objx);
 	objx = makefloat(objx, space, 0.08, 2.0, randfit(objx, 2));
 	giverandspin(objx);
@@ -146,16 +142,17 @@ struct objnode *makecirc(struct objnode *objx, cpSpace * space, bool statb,
     if (!statb)
 	cpBodySetPos(objx->b, pos);
 
-    objx->width = radius;
+    objx->radius = radius;
 
     cpShapeSetLayers(objx->s, NONBH);
 
     cpBodySetAngVel(objx->b, 20);
     cpShapeSetFriction(objx->s, 0.7);
     cpShapeSetElasticity(objx->s, 0.7f);
-    objx->c1 = setcolor(0.25, 0.25, 0.25, 1);
-    objx->c2 = setcolor(0.75, 0.75, 0.75, 1);
-    objx->s->collision_type = C_NONE;
+
+    // defualts
+    objx->colortype = COLOR_LARGE;
+    objx->s->collision_type = C_LARGE;
 
     return objx;
 }
@@ -184,16 +181,17 @@ struct objnode *makepoly(struct objnode *objx, cpSpace * space, bool statb,
 
     int i;
     for (i = 0; i < nverts; i++)
-	if (cpvlength(verts[i]) > objx->width)
-	    objx->width = cpvlength(verts[i]);
+	if (cpvlength(verts[i]) > objx->radius)
+	    objx->radius = cpvlength(verts[i]);
 
     cpShapeSetLayers(objx->s, NONBH);
 
     cpShapeSetFriction(objx->s, 0.7f);
     cpShapeSetElasticity(objx->s, 0.4f);
-    objx->c1 = setcolor(0.25, 0.25, 0.25, 1);
-    objx->c2 = setcolor(0.75, 0.75, 0.75, 1);
-    objx->s->collision_type = C_NONE;
+
+    // defaults
+    objx->colortype = COLOR_LARGE;
+    objx->s->collision_type = C_LARGE;
 
     return objx;
 }
@@ -218,8 +216,8 @@ struct objnode *makeline(struct objnode *objx, cpSpace * space,
 
     cpShapeSetFriction(objx->s, 1);
     cpShapeSetElasticity(objx->s, 0.7f);
-    objx->c1 = setcolor(1, 0, 0, 1);
-    objx->c2 = setcolor(0, 0, 0, 0);
+
+    objx->colortype = COLOR_LINE;
     objx->s->collision_type = C_NONE;
 
     return objx;
@@ -234,12 +232,14 @@ struct objnode *makefloat(struct objnode *objx, cpSpace * space,
     objx = makecirc(objx, space, false, mass, radius, pos);
 
     objx->b->velocity_func = &orbit;
+
+    // don't collide with black holes
     cpShapeSetGroup(objx->s, FLOATG);
-    objx->s->collision_type = C_SMALL;
 
     cpBodySetAngVel(objx->b, 2);
-    objx->c1 = setcolor(0, 0, 0, 0.625);
-    objx->c2 = setcolor(1, 0, 0, 0.625);
+
+    objx->colortype = COLOR_SMALL;
+    objx->s->collision_type = C_SMALL;
 
     return objx;
 }
@@ -254,14 +254,15 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
     // ...but they should not change their 0 velocity:
     objx->b->velocity_func = &dontfall;
     objx->bhole = true;
+
+    // don't collide
     cpShapeSetGroup(objx->s, FLOATG);
+    cpShapeSetLayers(objx->s, BHOLE);
 
     cpBodySetVelLimit(objx->b, 0);
     cpBodySetAngVel(objx->b, 10);
-    objx->c1 = setcolor(0.125, 0.125, 0.125, 0.5);
-    objx->c2 = setcolor(0.5, 0.5, 0.5, 0.5);
 
-    cpShapeSetLayers(objx->s, BHOLE);
+    objx->colortype = COLOR_BHOLE;
 
     return objx;
 }
@@ -271,11 +272,10 @@ struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
 	int playernum)
 {
     objx = maketria(objx, space, 1.33, 20, 8, randfit(objx, 10));
-    objx->c1 = setcolor(0.5, 0, 1, 1);
-    objx->c2 = setcolor(1, 0, 0, 1);
-    objx->s->collision_type = C_SHIP;
+    objx->ownedby = playernum;
 
-    objx->player = playernum;
+    objx->colortype = COLOR_SHIP;
+    objx->s->collision_type = C_SHIP;
 
     return objx;
 }
@@ -323,41 +323,28 @@ void giverandspin(struct objnode *objx)
     cpBodySetVel(objx->b, cpv(randrange(-60, 60), randrange(-60, 60)));
 }
 
-// returns a structure to store an object's color
-struct color_rgba setcolor(float r, float g, float b, float a)
-{
-    struct color_rgba color;
-
-    color.r = r;
-    color.g = g;
-    color.b = b;
-    color.a = a;
-
-    return color;
-}
-
 // picks a random spot to place an object, until nearobjs() returns false.
 cpVect randfit(struct objnode * objlast, cpFloat r)
 {
     int i;
     cpVect xymin, xymax;
-    cpVect rvect;
+    cpVect randv;
 
     xymin = cpv(XMIN + XYBUF, YMIN + XYBUF);
     xymax = cpv(XMAX - XYBUF, YMAX - XYBUF);
 
     for (i = 0; i < 1000; i++) {
-	rvect.x = randrange(xymin.x, xymax.x);
-	rvect.y = randrange(xymin.y, xymax.y);
-	if (nearobjs(objlast, rvect, r))
-	    return rvect;
+	randv.x = randrange(xymin.x, xymax.x);
+	randv.y = randrange(xymin.y, xymax.y);
+	if (nearobjs(objlast, randv, r))
+	    return randv;
     }
 
     fprintf(stderr,
 	    "Error: cannot find a random place to fit an object.\n");
     exit(4);
 
-    return rvect;
+    return randv;
 }
 
 // returns a random number between min and max
@@ -366,8 +353,9 @@ cpFloat randrange(cpFloat min, cpFloat max)
     return min + random() / (double) RAND_MAX *(max - min);
 }
 
-// returns true if an object 'width' wide intersects with another object.
-bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
+// returns true if an object with intersects with another object.
+// (crudely calculated with max radius from center of gravity.)
+bool nearobjs(struct objnode *objlast, cpVect randv, cpFloat radius)
 {
     cpFloat dist;
     struct objnode *objch = objlast;
@@ -375,20 +363,20 @@ bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
     while ((objch = objch->prev)) {
 
 	if (objch->geom == S_CIRC || objch->geom == S_POLY)
-	    dist = cpvlength(cpvsub(rvect, cpBodyGetPos(objch->b)));
+	    dist = cpvlength(cpvsub(randv, cpBodyGetPos(objch->b)));
 	else if (objch->geom == S_LSEG) {
 	    cpVect enda, endb, segv, posv;
 	    cpFloat angle;
 
 	    enda = cpSegmentShapeGetA(objch->s);
 	    endb = cpSegmentShapeGetB(objch->s);
-	    if (cpvlength(cpvsub(rvect, enda)) <
-		cpvlength(cpvsub(rvect, endb))) {
+	    if (cpvlength(cpvsub(randv, enda)) <
+		cpvlength(cpvsub(randv, endb))) {
 		segv = cpvsub(enda, endb);
-		posv = cpvsub(rvect, endb);
+		posv = cpvsub(randv, endb);
 	    } else {
 		segv = cpvsub(endb, enda);
-		posv = cpvsub(rvect, enda);
+		posv = cpvsub(randv, enda);
 	    }
 	    angle = cpvtoangle(posv) - cpvtoangle(segv);
 	    if (fabs(angle) < PI / 2)
@@ -398,7 +386,7 @@ bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
 	} else
 	    dist = INFINITY;
 
-	if (dist > objch->width + width)
+	if (dist > objch->radius + radius)
 	    continue;
 	else
 	    return false;
@@ -407,27 +395,25 @@ bool nearobjs(struct objnode *objlast, cpVect rvect, cpFloat width)
     return true;
 }
 
-// inserts a handle for pointing to a new physical body/shape
+// inserts a struct for pointing to a new body/shape
 struct objnode *makenode(struct objnode *objx)
 {
     struct objnode *objnew;
 
     objnew = malloc(sizeof(struct objnode));
+
+    objnew->geom = S_NONE;
+    objnew->radius = 0;
+    objnew->b = NULL;
+    objnew->s = NULL;
+    objnew->bhole = false;
+    objnew->pinfo = NULL;
+    objnew->ownedby = P_NONE;
+    objnew->colortype = COLOR_NONE;
+
     objnew->next = objx->next;
     objnew->prev = objx;
     objx->next = objnew;
-
-    objnew->player = P_NONE;
-    objnew->pmove = NULL;
-    objnew->geom = S_NONE;
-    objnew->bhole = false;
-    objnew->b = NULL;
-    objnew->s = NULL;
-    objnew->width = 0;
-    objnew->c1 = setcolor(0, 0, 0, 1);
-    objnew->c2 = setcolor(1, 1, 1, 1);
-    objnew->cstatus = 0;
-    curtime(&objnew->lasthit);
 
     return objnew;
 }
@@ -452,6 +438,7 @@ void rmobj(struct objnode *objx)
     cpShapeFree(objx->s);
     if (!cpBodyIsStatic(objx->b))
 	cpBodyFree(objx->b);
+    free(objx->pinfo);
 
     objx->prev->next = objx->next;
     if (objx->next)

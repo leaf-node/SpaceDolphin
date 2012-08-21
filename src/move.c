@@ -20,10 +20,10 @@
 void blastengines(struct objnode *player);
 void applyforces(struct objnode *player, struct forces f);
 struct objnode *findplayer(struct objnode *objroot, int playernum);
-void initpmove(struct objnode *player);
+void initthrust(struct objnode *player);
 
 
-// query for button press change, then call applyforces()
+// query for button press change, then start moving the players' ships.
 void interact(cpSpace * space, struct objnode *objroot,
 	      SDL_Surface ** screen)
 {
@@ -32,12 +32,8 @@ void interact(cpSpace * space, struct objnode *objroot,
     struct objnode *player1, *player2;
 
     player1 = findplayer(objroot, P_ONE);
-    if (player1->pmove == NULL)
-	initpmove(player1);
 
     player2 = findplayer(objroot, P_TWO);
-    if (player2->pmove == NULL)
-	initpmove(player2);
 
     while (SDL_PollEvent(&event)) {
 	switch (event.type) {
@@ -45,29 +41,29 @@ void interact(cpSpace * space, struct objnode *objroot,
 	    switch (event.key.keysym.sym) {
 
 	    case SDLK_UP:
-		player1->pmove->up = true;
+		player1->pinfo->thrust.up = true;
 		break;
 	    case SDLK_DOWN:
-		player1->pmove->down = true;
+		player1->pinfo->thrust.down = true;
 		break;
 	    case SDLK_LEFT:
-		player1->pmove->ccw = true;
+		player1->pinfo->thrust.ccw = true;
 		break;
 	    case SDLK_RIGHT:
-		player1->pmove->cw = true;
+		player1->pinfo->thrust.cw = true;
 		break;
 
 	    case SDLK_w:
-		player2->pmove->up = true;
+		player2->pinfo->thrust.up = true;
 		break;
 	    case SDLK_s:
-		player2->pmove->down = true;
+		player2->pinfo->thrust.down = true;
 		break;
 	    case SDLK_a:
-		player2->pmove->ccw = true;
+		player2->pinfo->thrust.ccw = true;
 		break;
 	    case SDLK_d:
-		player2->pmove->cw = true;
+		player2->pinfo->thrust.cw = true;
 		break;
 
 	    case SDLK_f:
@@ -87,29 +83,29 @@ void interact(cpSpace * space, struct objnode *objroot,
 	    switch (event.key.keysym.sym) {
 
 	    case SDLK_UP:
-		player1->pmove->up = false;
+		player1->pinfo->thrust.up = false;
 		break;
 	    case SDLK_DOWN:
-		player1->pmove->down = false;
+		player1->pinfo->thrust.down = false;
 		break;
 	    case SDLK_LEFT:
-		player1->pmove->ccw = false;
+		player1->pinfo->thrust.ccw = false;
 		break;
 	    case SDLK_RIGHT:
-		player1->pmove->cw = false;
+		player1->pinfo->thrust.cw = false;
 		break;
 
 	    case SDLK_w:
-		player2->pmove->up = false;
+		player2->pinfo->thrust.up = false;
 		break;
 	    case SDLK_s:
-		player2->pmove->down = false;
+		player2->pinfo->thrust.down = false;
 		break;
 	    case SDLK_a:
-		player2->pmove->ccw = false;
+		player2->pinfo->thrust.ccw = false;
 		break;
 	    case SDLK_d:
-		player2->pmove->cw = false;
+		player2->pinfo->thrust.cw = false;
 		break;
 
 	    default:
@@ -134,11 +130,11 @@ void interact(cpSpace * space, struct objnode *objroot,
 
 }
 
-// calculates and adds forces triggered by holding the movement keys down
-// it also has to stop the forces applied from the prev call to this function
+// calculates and adds forces triggered by holding the movement keys down.
+// it also has to stop the forces applied by the prev call to this function
 void blastengines(struct objnode *player)
 {
-    struct movement *pmove;
+    struct movement *thrust;
     cpFloat force = 0, tforce = 0;
     struct forces newf;
     cpVect rotv = cpBodyGetRot(player->b);
@@ -146,58 +142,58 @@ void blastengines(struct objnode *player)
     long dt;
     struct timespec now;
 
-    pmove = player->pmove;
+    thrust = &player->pinfo->thrust;
 
     // these test cases are to enforce soft limits on the rate of movement
-    if (pmove->up && !pmove->down) {
+    if (thrust->up && !thrust->down) {
 	if (cpvunrotate(cpBodyGetVel(player->b), rotv).y < MAXVEL)
 	    force = FORCE;
-    } else if (!pmove->up && pmove->down) {
+    } else if (!thrust->up && thrust->down) {
 	if (cpvunrotate(cpBodyGetVel(player->b), rotv).y > -MAXVEL)
 	    force = -FORCE;
     }
 
     curtime(&now);
-    dt = convtns(tdiff(now, pmove->markt));
-    pmove->markt = now;
+    dt = convtns(tdiff(now, thrust->markt));
+    thrust->markt = now;
 
     tforce = 0;
     angvel = cpBodyGetAngVel(player->b);
-    if (pmove->ccw) {
-	pmove->ccwt += dt;
-	pmove->ccwt =
-	    (pmove->ccwt > TORQRAMPT) ? TORQRAMPT : pmove->ccwt;
+    if (thrust->ccw) {
+	thrust->ccwt += dt;
+	thrust->ccwt =
+	    (thrust->ccwt > TORQRAMPT) ? TORQRAMPT : thrust->ccwt;
 
 	if (angvel < MAXANGVEL)
-	    tforce += TFORCE * sqrtl(pmove->ccwt / TORQRAMPT);
-    } else if (pmove->ccwt > 0) {
-	pmove->ccwt -= dt;
-	pmove->ccwt = (pmove->ccwt < 0) ? 0 : pmove->ccwt;
+	    tforce += TFORCE * sqrtl(thrust->ccwt / TORQRAMPT);
+    } else if (thrust->ccwt > 0) {
+	thrust->ccwt -= dt;
+	thrust->ccwt = (thrust->ccwt < 0) ? 0 : thrust->ccwt;
     }
 
-    if (pmove->cw) {
-	pmove->cwt += dt;
-	pmove->cwt = (pmove->cwt > TORQRAMPT) ? TORQRAMPT : pmove->cwt;
+    if (thrust->cw) {
+	thrust->cwt += dt;
+	thrust->cwt = (thrust->cwt > TORQRAMPT) ? TORQRAMPT : thrust->cwt;
 
 	if (angvel > -MAXANGVEL)
-	    tforce += -TFORCE * sqrtl(pmove->cwt / TORQRAMPT);
-    } else if (pmove->cwt > 0) {
-	pmove->cwt -= dt;
-	pmove->cwt = (pmove->cwt < 0) ? 0 : pmove->cwt;
+	    tforce += -TFORCE * sqrtl(thrust->cwt / TORQRAMPT);
+    } else if (thrust->cwt > 0) {
+	thrust->cwt -= dt;
+	thrust->cwt = (thrust->cwt < 0) ? 0 : thrust->cwt;
     }
 
     newf.force = cpvrotate(cpv(0, force), rotv);
     newf.tforce = cpv(0, tforce);
 
-    applyforces(player, pmove->prevf);
+    applyforces(player, thrust->prevf);
     applyforces(player, newf);
 
-    pmove->prevf.force = cpvneg(newf.force);
-    pmove->prevf.tforce = cpvneg(newf.tforce);
+    thrust->prevf.force = cpvneg(newf.force);
+    thrust->prevf.tforce = cpvneg(newf.tforce);
 }
 
-// apply a lasting external force to the center of gravity
-// apply lasting forces perpendicluar to vectors from the c.o.g.
+// apply a lasting external force to the center of gravity.
+// also apply lasting forces perpendicluar to vectors from the c.o.g.
 // (in other words, push and rotate the object)
 // these need to be subtracted later to stop their effect
 void applyforces(struct objnode *player, struct forces f)
@@ -213,7 +209,7 @@ void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
     ;
 }
 
-// set gravity to point towards black holes
+// set gravity (of previously chosen objects) to point towards black holes
 void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
     extern struct objnode objroot[];
@@ -250,32 +246,38 @@ struct objnode *findplayer(struct objnode *objroot, int playernum)
     struct objnode *objx;
 
     for (objx = objroot; objx != NULL; objx = objx->next)
-	if (objx->player == playernum)
+	if (objx->s != NULL && objx->s->collision_type == C_SHIP \
+		&& objx->ownedby == playernum) {
+	    if (objx->pinfo == NULL)
+		initthrust(objx);
 	    return objx;
+	}
 
     fprintf(stderr, "*** Error, could not find player %d\n", playernum);
     exit(5);
 
 }
 
-// initializes player to not be adding any additional force.
-void initpmove(struct objnode *player)
+// initializes playerinfo struct. starts with no thrust.
+void initthrust(struct objnode *player)
 {
-    player->pmove = malloc(sizeof(struct movement));
+    player->pinfo = malloc(sizeof(struct playerinfo));
 
-    player->pmove->prevf.force = cpvzero;
-    player->pmove->prevf.tforce = cpvzero;
-    player->pmove->markt.tv_sec = 0;
-    player->pmove->markt.tv_nsec = 0;
+    player->pinfo->hp = HPSTART;
 
-    player->pmove->up = false;
-    player->pmove->down = false;
-    player->pmove->left = false;
-    player->pmove->right = false;
-    player->pmove->cw = false;
-    player->pmove->cwt = 0;
-    player->pmove->ccw = false;
-    player->pmove->ccwt = 0;
+    player->pinfo->thrust.prevf.force = cpvzero;
+    player->pinfo->thrust.prevf.tforce = cpvzero;
+    player->pinfo->thrust.markt.tv_sec = 0;
+    player->pinfo->thrust.markt.tv_nsec = 0;
+
+    player->pinfo->thrust.up = false;
+    player->pinfo->thrust.down = false;
+    player->pinfo->thrust.left = false;
+    player->pinfo->thrust.right = false;
+    player->pinfo->thrust.cw = false;
+    player->pinfo->thrust.cwt = 0;
+    player->pinfo->thrust.ccw = false;
+    player->pinfo->thrust.ccwt = 0;
 
 }
 
