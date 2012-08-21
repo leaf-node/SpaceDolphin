@@ -39,7 +39,11 @@ int main(void)
     simtime = 0, acc = 0;
     for (;;) {
 
-	simtime = drawshapes(screen, sdlbuff, cr, objroot);
+	// sleep and set the amount of time to be simulated
+	simtime = timebal();
+
+	// draw stuff to the screen, including fps
+	drawshapes(screen, sdlbuff, cr, objroot, simtime);
 
 	// control movment of the ships
 	interact(space, objroot, &screen);

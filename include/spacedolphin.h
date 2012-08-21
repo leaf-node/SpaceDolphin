@@ -128,8 +128,8 @@ struct objnode {
 // draw.c
 void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr);
-long drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
-		struct objnode *objroot);
+void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot, long simtime);
 SDL_Surface *togglefullscreen(void);
 
 // move.c
