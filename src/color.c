@@ -25,8 +25,9 @@ struct entrylist {
 };
 
 
-struct colorset *makecolorset(double c1r, double c1g, double c1b, double c1a, \
-	double c2r, double c2g, double c2b, double c2a);
+struct colorset *makecolorset(double c1r, double c1g, double c1b,
+			      double c1a, double c2r, double c2g,
+			      double c2b, double c2a);
 void savecs(struct colorset *colors, int colortype, int ownedby);
 char *makekey(int x, int y);
 
@@ -36,12 +37,11 @@ char *makekey(int x, int y);
 void initcolors(void)
 {
     if (hcreate(HSIZE) == 0) {
-	fprintf(stderr, "*** error: failed to create hash table with " \
+	fprintf(stderr, "*** error: failed to create hash table with "
 		"max elems: %d\n", HSIZE);
 	exit(6);
     }
-
-    // values:		r,g,b,a,	    r,g,b,a
+    // values:          r,g,b,a,            r,g,b,a
     // the first set of colors is for the fill, the second for the border.
     savecs(makecolorset(0,0,0,0,	    1,1,1,1), COLOR_SHIP, P_NONE);
     savecs(makecolorset(0.5,0,1,1,	    1,0,0,1), COLOR_SHIP, P_ONE);
@@ -55,16 +55,17 @@ void initcolors(void)
     savecs(makecolorset(0,0,1,1,	    1,1,1,1), COLOR_SMALL, P_ONE);
     savecs(makecolorset(1,0,0,1,	    1,1,0,1), COLOR_SMALL, P_TWO);
 
-    savecs(makecolorset(0.10,0.10,0.10,1, \
-		0.75,0.75,0.75,1), COLOR_BHOLE, P_NONE);
+    savecs(makecolorset(0.10,0.10,0.10,1,
+			0.75,0.75,0.75,1), COLOR_BHOLE, P_NONE);
     savecs(makecolorset(1,0,0,1,	    1,1,1,1), COLOR_LINE, P_NONE);
 
 
 }
 
 // returns pointer to struct that stores color info (fill and border)
-struct colorset *makecolorset(double c1r, double c1g, double c1b, double c1a, \
-	double c2r, double c2g, double c2b, double c2a)
+struct colorset *makecolorset(double c1r, double c1g, double c1b,
+			      double c1a, double c2r, double c2g,
+			      double c2b, double c2a)
 {
     struct colorset *colors;
 
@@ -85,6 +86,7 @@ struct colorset *makecolorset(double c1r, double c1g, double c1b, double c1a, \
 
 
 struct entrylist entryroot = { NULL, NULL, NULL };
+
 struct entrylist *entrylast = &entryroot;
 
 // enters color struct into hashtable, with a key based on the functional type,
@@ -101,10 +103,10 @@ void savecs(struct colorset *colors, int colortype, int ownedby)
     entry.data = (void *) colors;
 
     if ((res = hsearch(entry, ENTER)) == NULL) {
-	fprintf(stderr, "*** error: failed to insert hash table element.\n");
+	fprintf(stderr,
+		"*** error: failed to insert hash table element.\n");
 	exit(6);
     }
-
 
     // keep a list of entries to free later on.
     currentry = malloc(sizeof(struct entrylist));
@@ -144,7 +146,7 @@ char *makekey(int x, int y)
     // if the max values need to be increased, then the len and format
     // strings need to be increased as well.
     if (x >= 16 * 16 || y >= 16 * 16) {
-	fprintf(stderr, "*** error: ints in key must be less than %d\n", \
+	fprintf(stderr, "*** error: ints in key must be less than %d\n",
 		16 * 16);
 	exit(6);
     }
@@ -155,7 +157,8 @@ char *makekey(int x, int y)
     err = snprintf(buff, len + 1, "color:%2x:%2x", x, y);
 
     if (err < 0 || err >= len + 1) {
-	fprintf(stderr, "*** error: snprintf gives this error code: %d\n", err);
+	fprintf(stderr, "*** error: snprintf gives this error code: %d\n",
+		err);
 	exit(6);
     }
 
@@ -174,7 +177,8 @@ struct colorset *findcolors(int colortype, int ownedby)
     entry.key = keystr;
 
     if ((res = hsearch(entry, FIND)) == NULL) {
-	fprintf(stderr, "*** error: failed to find element: %s.\n", keystr);
+	fprintf(stderr, "*** error: failed to find element: %s.\n",
+		keystr);
 	exit(6);
     }
 
@@ -182,4 +186,3 @@ struct colorset *findcolors(int colortype, int ownedby)
 
     return (struct colorset *) res->data;
 }
-

@@ -29,8 +29,9 @@
 enum players { P_NONE, P_ONE, P_TWO, P_THREE, P_FOUR };
 enum shape { S_NONE, S_LSEG, S_CIRC, S_POLY };
 enum collidetype { C_NONE, C_SHIP, C_LARGE, C_SMALL };
-enum colors { COLOR_LARGE, COLOR_SMALL, COLOR_LINE, COLOR_SHIP, COLOR_BHOLE,
-    COLOR_NONE };
+enum colors { COLOR_LARGE, COLOR_SMALL, COLOR_LINE, COLOR_SHIP,
+    COLOR_BHOLE, COLOR_NONE
+};
 enum sizes { HSIZE = sizeof(enum players) * sizeof(enum colors) * 2 };
 
 
@@ -72,7 +73,8 @@ struct playerinfo {
 
 // linked list node to keep track of objects for drawing and accessing
 struct objnode {
-    int geom; cpFloat radius;
+    int geom;
+    cpFloat radius;
     cpBody *b;
     cpShape *s;
     bool bhole;
@@ -151,10 +153,9 @@ void rmobj(struct objnode *objx);
 void rmobjs(struct objnode *objroot);
 
 // collide.c
-int chcolor (cpArbiter *arb, cpSpace *space, void *data);
+int chcolor(cpArbiter * arb, cpSpace * space, void *data);
 
 // color.c
 void initcolors(void);
 struct colorset *findcolors(int colortype, int ownedby);
 void freeentries(void);
-

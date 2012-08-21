@@ -19,7 +19,7 @@
 
 
 struct objnode objroot[1] = {
-    { S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, NULL, NULL }
+    {S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, NULL, NULL}
 };
 
 int main(void)
@@ -60,4 +60,3 @@ int main(void)
 
     return 0;
 }
-

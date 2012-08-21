@@ -112,12 +112,12 @@ cpSpace *makeshapes(struct objnode *objroot)
 	giverandspin(objx);
     }
 
-    cpSpaceAddCollisionHandler(space, C_SHIP, C_LARGE, NULL, *chcolor, \
-	NULL, NULL, objroot);
-    cpSpaceAddCollisionHandler(space, C_LARGE, C_SMALL, NULL, *chcolor, \
-	NULL, NULL, objroot);
-    cpSpaceAddCollisionHandler(space, C_SMALL, C_SHIP, NULL, *chcolor, \
-	NULL, NULL, objroot);
+    cpSpaceAddCollisionHandler(space, C_SHIP, C_LARGE, NULL, *chcolor,
+			       NULL, NULL, objroot);
+    cpSpaceAddCollisionHandler(space, C_LARGE, C_SMALL, NULL, *chcolor,
+			       NULL, NULL, objroot);
+    cpSpaceAddCollisionHandler(space, C_SMALL, C_SHIP, NULL, *chcolor,
+			       NULL, NULL, objroot);
 
     return space;
 }
@@ -269,7 +269,7 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 
 // make a ship for player number playernum
 struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
-	int playernum)
+			   int playernum)
 {
     objx = maketria(objx, space, 1.33, 20, 8, randfit(objx, 10));
     objx->ownedby = playernum;
@@ -324,7 +324,7 @@ void giverandspin(struct objnode *objx)
 }
 
 // picks a random spot to place an object, until nearobjs() returns false.
-cpVect randfit(struct objnode * objlast, cpFloat r)
+cpVect randfit(struct objnode *objlast, cpFloat r)
 {
     int i;
     cpVect xymin, xymax;

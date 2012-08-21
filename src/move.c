@@ -230,7 +230,7 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt)
 
 	    hmass = cpBodyGetMass(hole);
 	    g = hmass * BGRAV * (1 / distsq);
-	    g = (distsq < RDSQ) ? g * -REPFS : g;   // shoot close balls away
+	    g = (distsq < RDSQ) ? g * -REPFS : g;	// shoot close balls away
 
 	    unitv = cpvmult(cpvsub(hpos, bpos), (1 / sqrt(distsq)));
 	    gvect = cpvmult(unitv, g);
@@ -246,8 +246,8 @@ struct objnode *findplayer(struct objnode *objroot, int playernum)
     struct objnode *objx;
 
     for (objx = objroot; objx != NULL; objx = objx->next)
-	if (objx->s != NULL && objx->s->collision_type == C_SHIP \
-		&& objx->ownedby == playernum) {
+	if (objx->s != NULL && objx->s->collision_type == C_SHIP
+	    && objx->ownedby == playernum) {
 	    if (objx->pinfo == NULL)
 		initthrust(objx);
 	    return objx;
@@ -280,4 +280,3 @@ void initthrust(struct objnode *player)
     player->pinfo->thrust.ccwt = 0;
 
 }
-

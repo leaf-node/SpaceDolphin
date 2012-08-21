@@ -22,7 +22,7 @@
 // the color) of C_LARGE objects touched by the C_SHIP, C_SMALL objects touched
 // by C_LARGE objects, and C_SMALL objects that touch C_SHIP objects.
 // it also handles hitpoint reduction.
-int chcolor (cpArbiter *arb, cpSpace *space, void *data)
+int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 {
     struct objnode *obja, *objb, *objx;
     cpShape *sa, *sb;
@@ -30,9 +30,7 @@ int chcolor (cpArbiter *arb, cpSpace *space, void *data)
     cpArbiterGetShapes(arb, &sa, &sb);
 
     obja = objb = NULL;
-    for (objx = (struct objnode *) data; objx != NULL; \
-	    objx = objx->next)
-    {
+    for (objx = (struct objnode *) data; objx != NULL; objx = objx->next) {
 	if (objx->s == sa)
 	    obja = objx;
 	if (objx->s == sb)
@@ -40,26 +38,25 @@ int chcolor (cpArbiter *arb, cpSpace *space, void *data)
     }
 
     if (obja == NULL || objb == NULL) {
-	fprintf(stderr, "*** warning: couldn't find object during " \
+	fprintf(stderr, "*** warning: couldn't find object during "
 		"collision callback!\n");
 	return true;
     }
-
     // ship hits large object
-    if (obja->s->collision_type == C_SHIP \
-	    && objb->s->collision_type == C_LARGE) {
+    if (obja->s->collision_type == C_SHIP
+	&& objb->s->collision_type == C_LARGE) {
 
-	    objb->ownedby = obja->ownedby;
+	objb->ownedby = obja->ownedby;
     }
     // large object hits small object
-    else if (obja->s->collision_type == C_LARGE \
-	    && objb->s->collision_type == C_SMALL) {
+    else if (obja->s->collision_type == C_LARGE
+	     && objb->s->collision_type == C_SMALL) {
 
-	    objb->ownedby = obja->ownedby;
+	objb->ownedby = obja->ownedby;
     }
     // small object hits ship
-    else if (obja->s->collision_type == C_SMALL \
-	    && objb->s->collision_type == C_SHIP) {
+    else if (obja->s->collision_type == C_SMALL
+	     && objb->s->collision_type == C_SHIP) {
 
 	if (obja->ownedby != objb->ownedby) {
 	    objb->pinfo->hp -= 1;
@@ -74,4 +71,3 @@ int chcolor (cpArbiter *arb, cpSpace *space, void *data)
 
     return true;
 }
-

@@ -110,7 +110,7 @@ void waitns(long ns)
 // convert nanoseconds into a struct used by nanosleep
 void convttp(long ns, struct timespec *tp)
 {
-    tp->tv_sec  = ns / (long) 1e9;
+    tp->tv_sec = ns / (long) 1e9;
     tp->tv_nsec = ns % (long) 1e9;
 }
 
@@ -144,4 +144,3 @@ struct timespec tdiff(struct timespec tp0, struct timespec tp1)
     return dtp;
 
 }
-

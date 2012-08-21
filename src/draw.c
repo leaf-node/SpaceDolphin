@@ -74,12 +74,12 @@ void drawcirc(cairo_t * cr, struct objnode *objx)
     cairo_arc(cr, pos.x, pos.y, radius, 0, 2 * M_PI);
 
     cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
-	    colors->c1.b, colors->c1.a);
+			  colors->c1.b, colors->c1.a);
     cairo_fill_preserve(cr);
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, colors->c2.r, colors->c2.g,
-	    colors->c2.b, colors->c2.a);
+			  colors->c2.b, colors->c2.a);
     cairo_stroke(cr);
 
     cairo_move_to(cr, pos.x, pos.y);
@@ -103,7 +103,7 @@ void drawlseg(cairo_t * cr, struct objnode *objx)
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
-	    colors->c1.b, colors->c1.a);
+			  colors->c1.b, colors->c1.a);
     cairo_stroke(cr);
 
 }
@@ -133,12 +133,12 @@ void drawpoly(cairo_t * cr, struct objnode *objx)
     cairo_close_path(cr);
 
     cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
-	    colors->c1.b, colors->c1.a);
+			  colors->c1.b, colors->c1.a);
     cairo_fill_preserve(cr);
 
     cairo_set_line_width(cr, LPIXW / SCALEF);
     cairo_set_source_rgba(cr, colors->c2.r, colors->c2.g,
-	    colors->c2.b, colors->c2.a);
+			  colors->c2.b, colors->c2.a);
     cairo_stroke(cr);
 
 }
