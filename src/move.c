@@ -247,36 +247,11 @@ struct objnode *findplayer(struct objnode *objroot, int playernum)
 
     for (objx = objroot; objx != NULL; objx = objx->next)
 	if (objx->s != NULL && objx->s->collision_type == C_SHIP
-	    && objx->ownedby == playernum) {
-	    if (objx->pinfo == NULL)
-		initthrust(objx);
+	    && objx->ownedby == playernum)
+
 	    return objx;
-	}
 
     fprintf(stderr, "*** Error, could not find player %d\n", playernum);
     exit(5);
-
-}
-
-// initializes playerinfo struct. starts with no thrust.
-void initthrust(struct objnode *player)
-{
-    player->pinfo = malloc(sizeof(struct playerinfo));
-
-    player->pinfo->hp = HPSTART;
-
-    player->pinfo->thrust.prevf.force = cpvzero;
-    player->pinfo->thrust.prevf.tforce = cpvzero;
-    player->pinfo->thrust.markt.tv_sec = 0;
-    player->pinfo->thrust.markt.tv_nsec = 0;
-
-    player->pinfo->thrust.up = false;
-    player->pinfo->thrust.down = false;
-    player->pinfo->thrust.left = false;
-    player->pinfo->thrust.right = false;
-    player->pinfo->thrust.cw = false;
-    player->pinfo->thrust.cwt = 0;
-    player->pinfo->thrust.ccw = false;
-    player->pinfo->thrust.ccwt = 0;
 
 }

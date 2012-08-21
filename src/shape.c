@@ -24,6 +24,7 @@ enum groups { FLOATG = 1 };
 
 
 struct objnode *makenode(struct objnode *objx);
+void initplayer(struct objnode *player);
 void insertobj(cpSpace * space, struct objnode *objx);
 cpVect randfit(struct objnode *objx, cpFloat r);
 cpFloat randrange(cpFloat min, cpFloat max);
@@ -273,6 +274,7 @@ struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
 {
     objx = maketria(objx, space, 1.33, 20, 8, randfit(objx, 10));
     objx->ownedby = playernum;
+    initplayer(objx);
 
     objx->colortype = COLOR_SHIP;
     objx->s->collision_type = C_SHIP;
@@ -416,6 +418,29 @@ struct objnode *makenode(struct objnode *objx)
     objx->next = objnew;
 
     return objnew;
+}
+
+// initializes playerinfo struct. starts with no thrust and default hp
+void initplayer(struct objnode *player)
+{
+    player->pinfo = malloc(sizeof(struct playerinfo));
+
+    player->pinfo->hp = HPSTART;
+
+    player->pinfo->thrust.prevf.force = cpvzero;
+    player->pinfo->thrust.prevf.tforce = cpvzero;
+    player->pinfo->thrust.markt.tv_sec = 0;
+    player->pinfo->thrust.markt.tv_nsec = 0;
+
+    player->pinfo->thrust.up = false;
+    player->pinfo->thrust.down = false;
+    player->pinfo->thrust.left = false;
+    player->pinfo->thrust.right = false;
+    player->pinfo->thrust.cw = false;
+    player->pinfo->thrust.cwt = 0;
+    player->pinfo->thrust.ccw = false;
+    player->pinfo->thrust.ccwt = 0;
+
 }
 
 // inserts object's body and shape into the space
