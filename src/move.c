@@ -19,7 +19,6 @@
 
 void blastengines(struct objnode *player);
 void applyforces(struct objnode *player, struct forces f);
-struct objnode *findplayer(struct objnode *objroot, int playernum);
 void initthrust(struct objnode *player);
 
 

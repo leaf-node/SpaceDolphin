@@ -71,7 +71,8 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
     else if (obja->s->collision_type == C_SMALL
 	     && objb->s->collision_type == C_SHIP) {
 
-	if (obja->ownedby != objb->ownedby) {
+	if (obja->ownedby != objb->ownedby
+	    && obja->ownedby != P_NONE) {
 	    objb->pinfo->hp -= 1;
 	    obja->ownedby = P_NONE;
 	    // the ship can get hit multiple times in a row, but the small

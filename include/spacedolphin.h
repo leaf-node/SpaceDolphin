@@ -87,7 +87,7 @@ struct objnode {
     struct objnode *next;
 };
 
-#define HPSTART	       30	// the hitpoints players start with
+#define HPSTART		7	// the hitpoints players start with
 #define SHORTTIME     0.1	// max sec between collisions to be "continuous"
 
 #define DEBUG	    false	// print info about graphics mode
@@ -119,7 +119,8 @@ struct objnode {
 #define XMIN          0.0	// the lower width coord ...
 #define YMAX        120.0	// the higher height coord ...
 #define YMIN          0.0	// the lower height coord ...
-#define XYBUF        20.0	// border not to put rand objects in
+#define XYBUF         5.0	// border not to put rand objects in
+#define HPBUF	      4.0	// space to give for the hp meters
 
 #define SCALEF	      4.0	// scaling factor for choosing window size
 #define LPIXW	      1.0	// the pixel width of lines and borders
@@ -138,6 +139,7 @@ bool interact(cpSpace * space, struct objnode *objroot,
 	      SDL_Surface ** screen);
 void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
+struct objnode *findplayer(struct objnode *objroot, int playernum);
 
 // time.c
 void framerate(long simtime, double *simrate, int *fps);

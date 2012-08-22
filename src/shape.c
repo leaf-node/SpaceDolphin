@@ -69,8 +69,8 @@ cpSpace *makeshapes(struct objnode *objroot)
 /* boundaries for the game... */
     objx = makeline(objx, space, true, cpv(XMIN, YMIN + 1),
 		    cpv(XMAX, YMIN + 1));
-    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1),
-		    cpv(XMAX, YMAX - 1));
+    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1 - HPBUF),
+		    cpv(XMAX, YMAX - 1 - HPBUF));
 
     objx = makeline(objx, space, true, cpv(XMIN + 1, YMAX),
 		    cpv(XMIN + 1, YMIN));
@@ -333,7 +333,7 @@ cpVect randfit(struct objnode *objlast, cpFloat r)
     cpVect randv;
 
     xymin = cpv(XMIN + XYBUF, YMIN + XYBUF);
-    xymax = cpv(XMAX - XYBUF, YMAX - XYBUF);
+    xymax = cpv(XMAX - XYBUF, YMAX - XYBUF - HPBUF);
 
     for (i = 0; i < 1000; i++) {
 	randv.x = randrange(xymin.x, xymax.x);

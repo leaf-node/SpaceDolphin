@@ -21,6 +21,9 @@ void drawcirc(cairo_t * cr, struct objnode *objx);
 void drawlseg(cairo_t * cr, struct objnode *objx);
 void drawpoly(cairo_t * cr, struct objnode *objx);
 void drawfps(cairo_t * cr, long simtime);
+void drawhpmeters(cairo_t *cr, int hpmax, int hp1, int hp2);
+void drawhpmeter(cairo_t *cr, struct colorset *colors, double hpratio,
+		 int direction);
 void cairoerase(cairo_t * cr);
 SDL_Surface *setupSDLscreen(void);
 
@@ -29,7 +32,7 @@ SDL_Surface *setupSDLscreen(void);
 void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 		struct objnode *objroot, long simtime)
 {
-    struct objnode *objx = objroot;
+    struct objnode *objx = objroot, *player1, *player2;
 
     cairoerase(cr);
     while ((objx = objx->next) != NULL) {
@@ -49,6 +52,11 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 #if SHOWFPS
     drawfps(cr, simtime);
 #endif
+
+    player1 = findplayer(objroot, P_ONE);
+    player2 = findplayer(objroot, P_TWO);
+
+    drawhpmeters(cr, HPSTART, player1->pinfo->hp, player2->pinfo->hp);
 
     SDL_BlitSurface(sdlbuff, NULL, screen, NULL);
     SDL_Flip(screen);
@@ -157,13 +165,56 @@ void drawfps(cairo_t * cr, long simtime)
 	sprintf(s, "Framerate: %3d fps", fps);
 	//   cairo_text_extents(cr, s, &te);
 	cairo_scale(cr, 1.0, -1.0);
-	cairo_move_to(cr, 3, -114);
+	cairo_move_to(cr, 3, -114 + HPBUF);
 	cairo_show_text(cr, s);
 	sprintf(s, "Simulation rate: %1.2lfx", simrate);
-	cairo_move_to(cr, 3, -110);
+	cairo_move_to(cr, 3, -110 + HPBUF);
 	cairo_show_text(cr, s);
 	cairo_scale(cr, 1.0, -1.0);
     }
+
+}
+
+// draws both the hp meters
+void drawhpmeters(cairo_t *cr, int hpmax, int hp1, int hp2)
+{
+    struct colorset *colors1, *colors2;
+
+    colors1 = findcolors(COLOR_SHIP, P_ONE);
+    colors2 = findcolors(COLOR_SHIP, P_TWO);
+
+    drawhpmeter(cr, colors1, hp1 / (double) hpmax, -1);
+    drawhpmeter(cr, colors2, hp2 / (double) hpmax, 1);
+
+}
+
+// draws a single hp meter
+void drawhpmeter(cairo_t *cr, struct colorset *colors, double hpratio,
+		 int direction)
+{
+    double xmid, xpos;
+
+    if (hpratio < 0)
+	hpratio = 0;
+
+    xmid = ((double) XMAX - XMIN) / 2;
+    xpos = xmid + hpratio * (xmid - 2) * direction;
+
+    cairo_move_to(cr, xmid, YMAX - 1);
+    cairo_line_to(cr, xmid, YMAX - HPBUF);
+    cairo_line_to(cr, xpos, YMAX - HPBUF);
+    cairo_line_to(cr, xpos, YMAX - 1);
+
+    cairo_close_path(cr);
+
+    cairo_set_source_rgba(cr, colors->c1.r, colors->c1.g,
+			  colors->c1.b, colors->c1.a);
+    cairo_fill_preserve(cr);
+
+    cairo_set_line_width(cr, LPIXW / SCALEF);
+    cairo_set_source_rgba(cr, colors->c2.r, colors->c2.g,
+			  colors->c2.b, colors->c2.a);
+    cairo_stroke(cr);
 
 }
 
