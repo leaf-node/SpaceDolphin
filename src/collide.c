@@ -51,18 +51,20 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
     if (obja->s->collision_type == C_SHIP
 	&& objb->s->collision_type == C_LARGE) {
 
-	if (!isbrief(dt) && (obja->ownedby != objb->ownedby)) {
+	if (!isbrief(dt) || (objb->lastchangeby == obja)) {
 	    objb->ownedby = obja->ownedby;
 	    objb->lastchange = now;
+	    objb->lastchangeby = obja;
 	}
     }
     // large object hits small object
     else if (obja->s->collision_type == C_LARGE
 	     && objb->s->collision_type == C_SMALL) {
 
-	if (!isbrief(dt) && (obja->ownedby != objb->ownedby)) {
+	if (!isbrief(dt) || (objb->lastchangeby == obja)) {
 	    objb->ownedby = obja->ownedby;
 	    objb->lastchange = now;
+	    objb->lastchangeby = obja;
 	}
     }
     // small object hits ship
@@ -76,6 +78,7 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 	    // object should not cycle color quickly when stuck between a ship
 	    // and a large object.
 	    obja->lastchange = now;
+	    obja->lastchangeby = objb;
 	}
     }
     // this shouldn't happen

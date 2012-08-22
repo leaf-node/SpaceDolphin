@@ -82,12 +82,13 @@ struct objnode {
     int ownedby;
     int colortype;
     struct timespec lastchange;
+    struct objnode *lastchangeby;
     struct objnode *prev;
     struct objnode *next;
 };
 
 #define HPSTART	    30		// the hitpoints players start with
-#define SHORTTIME   0.25	// the fastest an colored object changes color
+#define SHORTTIME   0.1		// max sec between collisions to be "continuous"
 
 #define DEBUG	    false	// print info about graphics mode
 #define SHOWFPS	    true	// show the fps if true
