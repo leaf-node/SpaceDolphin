@@ -234,7 +234,7 @@ struct objnode *makefloat(struct objnode *objx, cpSpace * space,
 
     objx->b->velocity_func = &orbit;
 
-    // don't collide with black holes
+    // don't collide with eachother or black holes
     cpShapeSetGroup(objx->s, FLOATG);
 
     cpBodySetAngVel(objx->b, 2);
