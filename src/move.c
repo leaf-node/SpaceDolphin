@@ -24,7 +24,7 @@ void initthrust(struct objnode *player);
 
 
 // query for button press change, then start moving the players' ships.
-void interact(cpSpace * space, struct objnode *objroot,
+bool interact(cpSpace * space, struct objnode *objroot,
 	      SDL_Surface ** screen)
 {
     SDL_Event event;
@@ -71,9 +71,7 @@ void interact(cpSpace * space, struct objnode *objroot,
 		break;
 	    case SDLK_q:
 	    case SDLK_ESCAPE:
-		rmobjs(objroot);
-		cpSpaceFree(space);
-		exit(0);
+		return false;
 		break;
 	    default:
 		break;
@@ -113,9 +111,7 @@ void interact(cpSpace * space, struct objnode *objroot,
 	    }
 	    break;
 	case SDL_QUIT:
-	    rmobjs(objroot);
-	    cpSpaceFree(space);
-	    exit(0);
+	    return false;
 	    break;
 	default:
 	    break;
@@ -128,6 +124,7 @@ void interact(cpSpace * space, struct objnode *objroot,
     if (togglefsm == true)
 	*screen = togglefullscreen();
 
+    return true;
 }
 
 // calculates and adds forces triggered by holding the movement keys down.

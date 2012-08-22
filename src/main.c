@@ -22,12 +22,16 @@ struct objnode objroot[1] = {
     {S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, NULL, NULL}
 };
 
+void cleanup(SDL_Surface * sdlbuf, cairo_surface_t * surface, struct objnode
+	     *objroot, cpSpace * space);
+
 int main(void)
 {
     SDL_Surface *screen, *sdlbuff;
     cairo_surface_t *surface;
     cairo_t *cr;
     long simtime, acc;
+    bool play;
 
     cpSpace *space;
 
@@ -36,8 +40,9 @@ int main(void)
     space = makeshapes(objroot);
 
 
+    play = true;
     simtime = 0, acc = 0;
-    for (;;) {
+    while (play == true) {
 
 	// sleep and set the amount of time to be simulated
 	simtime = timebal();
@@ -46,7 +51,7 @@ int main(void)
 	drawshapes(screen, sdlbuff, cr, objroot, simtime);
 
 	// control movment of the ships
-	interact(space, objroot, &screen);
+	play = interact(space, objroot, &screen);
 
 	// simulate the amount of real time since the last simulation.
 	for (acc += simtime; acc > DT; acc -= DT)
@@ -54,13 +59,20 @@ int main(void)
 
     }
 
-    // clean up
-    rmobjs(objroot);
-    cpSpaceFree(space);
-    cairo_surface_destroy(surface);
-    hdestroy();
-    freeentries();
-    SDL_FreeSurface(sdlbuff);
+    cleanup(sdlbuff, surface, objroot, space);
 
     return 0;
+}
+
+// free up some memory
+void cleanup(SDL_Surface * sdlbuff, cairo_surface_t * surface, struct objnode
+	     *objroot, cpSpace * space)
+{
+    SDL_FreeSurface(sdlbuff);
+    cairo_surface_destroy(surface);
+    rmobjs(objroot);
+    cpSpaceFree(space);
+    freecolorentries();
+    hdestroy();
+
 }

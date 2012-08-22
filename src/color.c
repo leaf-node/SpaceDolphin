@@ -122,7 +122,7 @@ void savecs(struct colorset *colors, int colortype, int ownedby)
 }
 
 // free the keys/values associated with entries in the hash table
-void freeentries(void)
+void freecolorentries(void)
 {
     struct entrylist *entryx, *entrynext;
 

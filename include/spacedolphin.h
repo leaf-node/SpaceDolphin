@@ -133,7 +133,7 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 SDL_Surface *togglefullscreen(void);
 
 // move.c
-void interact(cpSpace * space, struct objnode *objroot,
+bool interact(cpSpace * space, struct objnode *objroot,
 	      SDL_Surface ** screen);
 void dontfall(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
@@ -158,4 +158,4 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data);
 // color.c
 void initcolors(void);
 struct colorset *findcolors(int colortype, int ownedby);
-void freeentries(void);
+void freecolorentries(void);
