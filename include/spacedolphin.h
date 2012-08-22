@@ -81,11 +81,13 @@ struct objnode {
     struct playerinfo *pinfo;
     int ownedby;
     int colortype;
+    struct timespec lastchange;
     struct objnode *prev;
     struct objnode *next;
 };
 
 #define HPSTART	    30		// the hitpoints players start with
+#define SHORTTIME   0.25	// the fastest an colored object changes color
 
 #define DEBUG	    false	// print info about graphics mode
 #define SHOWFPS	    true	// show the fps if true
@@ -146,6 +148,7 @@ void convttp(long ns, struct timespec *tp);
 long convtns(struct timespec tp);
 void curtime(struct timespec *tp);
 struct timespec tdiff(struct timespec tp0, struct timespec tp1);
+bool isbrief(struct timespec dt);
 
 // shape.c
 cpSpace *makeshapes(struct objnode *objx);

@@ -26,6 +26,7 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 {
     struct objnode *obja, *objb, *objx;
     cpShape *sa, *sb;
+    struct timespec now, dt;
 
     cpArbiterGetShapes(arb, &sa, &sb);
 
@@ -42,17 +43,27 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 		"collision callback!\n");
 	return true;
     }
+
+    curtime(&now);
+    dt = tdiff(now, objb->lastchange);
+
     // ship hits large object
     if (obja->s->collision_type == C_SHIP
 	&& objb->s->collision_type == C_LARGE) {
 
-	objb->ownedby = obja->ownedby;
+	if (!isbrief(dt) && (obja->ownedby != objb->ownedby)) {
+	    objb->ownedby = obja->ownedby;
+	    objb->lastchange = now;
+	}
     }
     // large object hits small object
     else if (obja->s->collision_type == C_LARGE
 	     && objb->s->collision_type == C_SMALL) {
 
-	objb->ownedby = obja->ownedby;
+	if (!isbrief(dt) && (obja->ownedby != objb->ownedby)) {
+	    objb->ownedby = obja->ownedby;
+	    objb->lastchange = now;
+	}
     }
     // small object hits ship
     else if (obja->s->collision_type == C_SMALL
@@ -61,6 +72,10 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 	if (obja->ownedby != objb->ownedby) {
 	    objb->pinfo->hp -= 1;
 	    obja->ownedby = P_NONE;
+	    // the ship can get hit multiple times in a row, but the small
+	    // object should not cycle color quickly when stuck between a ship
+	    // and a large object.
+	    obja->lastchange = now;
 	}
     }
     // this shouldn't happen

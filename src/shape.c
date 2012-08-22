@@ -412,6 +412,7 @@ struct objnode *makenode(struct objnode *objx)
     objnew->pinfo = NULL;
     objnew->ownedby = P_NONE;
     objnew->colortype = COLOR_NONE;
+    curtime(&objnew->lastchange);
 
     objnew->next = objx->next;
     objnew->prev = objx;

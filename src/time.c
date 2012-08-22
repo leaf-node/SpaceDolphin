@@ -144,3 +144,19 @@ struct timespec tdiff(struct timespec tp0, struct timespec tp1)
     return dtp;
 
 }
+
+// returns true if the len of time of dt is shorter than SHORTTIME seconds
+bool isbrief(struct timespec dt)
+{
+    int secs, nsecs;
+
+    secs = (int) floor(SHORTTIME);
+    nsecs = (int) 1e9 * remainder(SHORTTIME, 1);
+
+    if ((dt.tv_sec > secs)
+	|| ((dt.tv_sec == secs)
+	    && (dt.tv_nsec >= nsecs)))
+	return false;
+    else
+	return true;
+}

@@ -19,7 +19,7 @@
 
 
 struct objnode objroot[1] = {
-    {S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, NULL, NULL}
+    {S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, {0, 0}, NULL, NULL}
 };
 
 void cleanup(SDL_Surface * sdlbuf, cairo_surface_t * surface, struct objnode
