@@ -150,7 +150,7 @@ void blastengines(struct objnode *player)
 	    force = -FORCE;
     }
 
-    curtime(&now);
+    now = curtime();
     dt = convtns(tdiff(now, thrust->markt));
     thrust->markt = now;
 

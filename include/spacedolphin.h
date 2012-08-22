@@ -144,9 +144,9 @@ void orbit(cpBody * body, cpVect gravity, cpFloat damping, cpFloat dt);
 void framerate(long simtime, double *simrate, int *fps);
 long timebal(void);
 void waitns(long ns);
-void convttp(long ns, struct timespec *tp);
+struct timespec convttp(long ns);
 long convtns(struct timespec tp);
-void curtime(struct timespec *tp);
+struct timespec curtime(void);
 struct timespec tdiff(struct timespec tp0, struct timespec tp1);
 bool isbrief(struct timespec dt);
 

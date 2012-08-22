@@ -78,7 +78,7 @@ cpSpace *makeshapes(struct objnode *objroot)
 		    cpv(XMAX - 1, YMIN));
 
     // needed before random intial velocities, placement and rotation
-    curtime(&time);
+    time = curtime();
     srandom(time.tv_nsec);
 
 /* deterministically placed objects... */
@@ -412,7 +412,7 @@ struct objnode *makenode(struct objnode *objx)
     objnew->pinfo = NULL;
     objnew->ownedby = P_NONE;
     objnew->colortype = COLOR_NONE;
-    curtime(&objnew->lastchange);
+    objnew->lastchange = curtime();
 
     objnew->next = objx->next;
     objnew->prev = objx;

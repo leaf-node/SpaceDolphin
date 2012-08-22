@@ -44,7 +44,7 @@ int chcolor(cpArbiter * arb, cpSpace * space, void *data)
 	return true;
     }
 
-    curtime(&now);
+    now = curtime();
     dt = tdiff(now, objb->lastchange);
 
     // ship hits large object

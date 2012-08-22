@@ -29,7 +29,7 @@ void framerate(long simtime, double *simrate, int *fps)
     struct timespec now;
     static struct timespec markt;
 
-    curtime(&now);
+    now = curtime();
     if (markt.tv_sec == 0 && markt.tv_nsec == 0)
 	markt = now;
     else {
@@ -66,7 +66,7 @@ long timebal(void)
     static struct timespec markt, marktbeforeidle;
 
 
-    curtime(&now);
+    now = curtime();
     if (markt.tv_sec == 0 && markt.tv_nsec == 0)
 	markt = marktbeforeidle = now;
 
@@ -79,7 +79,7 @@ long timebal(void)
     waitt = (waitt < minidle) ? minidle : waitt;
 
     waitns(waitt);
-    curtime(&markt);
+    markt = curtime();
 
     truewaitt = convtns(tdiff(markt, marktbeforeidle));
     if (waitdiff == 0)
@@ -102,16 +102,20 @@ void waitns(long ns)
 
     if (ns <= 0)
 	return;
-    convttp(ns, &t);
+    t = convttp(ns);
     if (nanosleep(&t, NULL) != 0)
 	printf("*** nanosleep error ***\n");
 }
 
 // convert nanoseconds into a struct used by nanosleep
-void convttp(long ns, struct timespec *tp)
+struct timespec convttp(long ns)
 {
-    tp->tv_sec = ns / (long) 1e9;
-    tp->tv_nsec = ns % (long) 1e9;
+    struct timespec tp;
+
+    tp.tv_sec = ns / (long) 1e9;
+    tp.tv_nsec = ns % (long) 1e9;
+
+    return tp;
 }
 
 // convert timespec struct into nanoseconds. beware of overflow on 32 bit
@@ -122,9 +126,13 @@ long convtns(struct timespec tp)
 }
 
 // get current monotinic time in nanoseconds
-void curtime(struct timespec *tp)
+struct timespec curtime(void)
 {
-    clock_gettime(CLOCK_MONOTONIC, tp);
+    struct timespec tp;
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+
+    return tp;
 }
 
 // returns the delta between two times
