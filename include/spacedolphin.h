@@ -67,6 +67,7 @@ struct movement {
 
 // basic player information
 struct playerinfo {
+    char *name;
     int hp;
     struct movement thrust;
 };

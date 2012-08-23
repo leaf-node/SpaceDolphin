@@ -46,7 +46,7 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 struct objnode *makerect(struct objnode *objx, cpSpace * space,
 			 cpFloat mass, cpFloat width, cpVect pos);
 struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
-			   int playernum);
+			   int playernum, char *name);
 struct objnode *maketria(struct objnode *objx, cpSpace * space,
 			 cpFloat mass, cpFloat len, cpFloat width,
 			 cpVect pos);
@@ -97,11 +97,11 @@ cpSpace *makeshapes(struct objnode *objroot)
 /* randomly placed objects... */
 
     // create player one
-    objx = makeplayer(objx, space, P_ONE);
+    objx = makeplayer(objx, space, P_ONE, "purple");
     giverandspin(objx);
 
     // create player two
-    objx = makeplayer(objx, space, P_TWO);
+    objx = makeplayer(objx, space, P_TWO, "orange");
     giverandspin(objx);
 
     for (i = 0; i < 7; i++) {
@@ -270,11 +270,12 @@ struct objnode *makebhole(struct objnode *objx, cpSpace * space,
 
 // make a ship for player number playernum
 struct objnode *makeplayer(struct objnode *objx, cpSpace * space,
-			   int playernum)
+			   int playernum, char *name)
 {
     objx = maketria(objx, space, 1.33, 20, 8, randfit(objx, 10));
     objx->ownedby = playernum;
     initplayer(objx);
+    objx->pinfo->name = name;
 
     objx->colortype = COLOR_SHIP;
     objx->s->collision_type = C_SHIP;
@@ -427,6 +428,8 @@ void initplayer(struct objnode *player)
 {
     player->pinfo = malloc(sizeof(struct playerinfo));
 
+    // the name should be set later on
+    player->pinfo->name = NULL;
     player->pinfo->hp = HPSTART;
 
     player->pinfo->thrust.prevf.force = cpvzero;

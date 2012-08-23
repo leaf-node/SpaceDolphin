@@ -22,6 +22,8 @@ struct objnode objroot[1] = {
     {S_NONE, 0, NULL, NULL, false, NULL, P_NONE, COLOR_NONE, {0, 0}, NULL, NULL}
 };
 
+bool someonelost(struct objnode *objroot);
+void showwinner(struct objnode *objroot);
 void cleanup(SDL_Surface * sdlbuf, cairo_surface_t * surface, struct objnode
 	     *objroot, cpSpace * space);
 
@@ -57,11 +59,64 @@ int main(void)
 	for (acc += simtime; acc > DT; acc -= DT)
 	    cpSpaceStep(space, (double) DT / 1e9);
 
+	if (someonelost(objroot)) {
+	    drawshapes(screen, sdlbuff, cr, objroot, simtime);
+	    showwinner(objroot);
+	    break;
+	}
     }
 
     cleanup(sdlbuff, surface, objroot, space);
 
     return 0;
+}
+
+bool someonelost(struct objnode *objroot)
+{
+    struct objnode *player1, *player2;
+    int hp1, hp2;
+
+    player1 = findplayer(objroot, P_ONE);
+    player2 = findplayer(objroot, P_TWO);
+
+    hp1 = player1->pinfo->hp;
+    hp2 = player2->pinfo->hp;
+
+    if (hp1 <= 0 || hp2 <= 0)
+	return true;
+    else
+	return false;
+
+}
+
+void showwinner(struct objnode *objroot)
+{
+    struct objnode *player1, *player2;
+    int hp1, hp2;
+
+    player1 = findplayer(objroot, P_ONE);
+    player2 = findplayer(objroot, P_TWO);
+
+    hp1 = player1->pinfo->hp;
+    hp2 = player2->pinfo->hp;
+
+    if (hp1 <= 0 && hp2 <= 0)
+	printf("the game was a tie!\n");
+    else if (hp1 <= 0) {
+	if (player2->pinfo->name != NULL)
+	    printf("%s wins!\n", player2->pinfo->name);
+	else
+	    printf("player 2 wins!\n");
+    }
+    else {
+	if (player1->pinfo->name != NULL)
+	    printf("%s wins!\n", player1->pinfo->name);
+	else
+	    printf("player 1 wins!\n");
+    }
+
+    waitns(1e9 * 2);
+
 }
 
 // free up some memory
