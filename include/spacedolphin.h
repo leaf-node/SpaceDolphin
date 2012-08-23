@@ -123,6 +123,7 @@ struct objnode {
 
 #define SCALEF	      4.0	// scaling factor for choosing window size
 #define LPIXW	      1.0	// the pixel width of lines and borders
+#define FONTSIZE       14	// font size (pixel height?)
 
 #define PI   3.1415926535	// just pi
 
@@ -130,6 +131,8 @@ struct objnode {
 void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 		  cairo_surface_t ** surface, cairo_t ** cr);
 void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot, long simtime);
+void showwinner(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 		struct objnode *objroot, long simtime);
 SDL_Surface *togglefullscreen(void);
 

@@ -24,6 +24,11 @@ void drawfps(cairo_t * cr, long simtime);
 void drawhpmeters(cairo_t *cr, int hpmax, int hp1, int hp2);
 void drawhpmeter(cairo_t *cr, struct colorset *colors, double hpratio,
 		 int direction);
+void showwinnertext(cairo_t *cr, char *name);
+void centermessage(cairo_t *cr, char *str, struct color_rgba *color);
+void drawstringxy(cairo_t *cr, char *str, struct color_rgba *color,
+		  double x, double y);
+void drawtoscreen(SDL_Surface *screen, SDL_Surface *sdlbuff);
 void cairoerase(cairo_t * cr);
 SDL_Surface *setupSDLscreen(void);
 
@@ -58,8 +63,7 @@ void drawshapes(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
 
     drawhpmeters(cr, HPSTART, player1->pinfo->hp, player2->pinfo->hp);
 
-    SDL_BlitSurface(sdlbuff, NULL, screen, NULL);
-    SDL_Flip(screen);
+    drawtoscreen(screen, sdlbuff);
 
 }
 
@@ -153,26 +157,105 @@ void drawfps(cairo_t * cr, long simtime)
 {
     int fps;
     double simrate;
-    //cairo_text_extents_t te;
-
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_set_font_size(cr, 3.5);
+    struct color_rgba color;
 
     framerate(simtime, &simrate, &fps);
 
+    color.r = 1; color.b = 1;
+    color.g = 1; color.a = 1;
+
     if (fps >= 0) {
 	char s[100];
+
 	sprintf(s, "Framerate: %3d fps", fps);
-	//   cairo_text_extents(cr, s, &te);
-	cairo_scale(cr, 1.0, -1.0);
-	cairo_move_to(cr, 3, -YMAX + HPBUF + 6);
-	cairo_show_text(cr, s);
+	drawstringxy(cr, s, &color, 3, YMAX - HPBUF - 6);
+
 	sprintf(s, "Simulation rate: %1.2lfx", simrate);
-	cairo_move_to(cr, 3, -YMAX + HPBUF + 10);
-	cairo_show_text(cr, s);
-	cairo_scale(cr, 1.0, -1.0);
+	drawstringxy(cr, s, &color, 3, YMAX - HPBUF - 10);
     }
 
+}
+
+// displays text that states the winner
+void showwinner(SDL_Surface * screen, SDL_Surface * sdlbuff, cairo_t * cr,
+		struct objnode *objroot, long simtime)
+{
+    struct objnode *player1, *player2;
+    int hp1, hp2;
+
+    // draw the last frame first
+    drawshapes(screen, sdlbuff, cr, objroot, simtime);
+
+    player1 = findplayer(objroot, P_ONE);
+    player2 = findplayer(objroot, P_TWO);
+
+    hp1 = player1->pinfo->hp;
+    hp2 = player2->pinfo->hp;
+
+    if (hp1 <= 0 && hp2 <= 0)
+	printf("the game was a tie!\n");
+    else if (hp1 <= 0) {
+	if (player2->pinfo->name != NULL)
+	    showwinnertext(cr, player2->pinfo->name);
+	else
+	    showwinnertext(cr, "player 2");
+    }
+    else {
+	if (player1->pinfo->name != NULL)
+	    showwinnertext(cr, player1->pinfo->name);
+	else
+	    showwinnertext(cr, "player 1");
+    }
+
+    drawtoscreen(screen, sdlbuff);
+
+    waitns(1e9 * 2);
+}
+
+// displays the winning player's name and that they won
+void showwinnertext(cairo_t *cr, char *name)
+{
+    int slen;
+    char *str;
+    struct color_rgba color;
+
+    color.r = 1; color.b = 1;
+    color.g = 1; color.a = 1;
+
+    slen = strlen(name) + strlen(" wins!");
+    str = malloc(slen + 1);
+    snprintf(str, slen + 1, "%s wins!", name);
+
+    centermessage(cr, str, &color);
+
+    free(str);
+}
+
+// displays centered text on the screen
+void centermessage(cairo_t *cr, char *str, struct color_rgba *color)
+{
+    double width, height;
+    cairo_text_extents_t extents;
+
+    cairo_text_extents(cr, str, &extents);
+
+    width = extents.width;
+    height = extents.height;
+
+    drawstringxy(cr, str, color, (XMAX - width) / 2, (YMAX - HPBUF - height) / 2);
+
+}
+
+// draws text at the specified x,y space coords. (not pixel coords)
+void drawstringxy(cairo_t *cr, char *str, struct color_rgba *color,
+		  double x, double y)
+{
+    cairo_set_source_rgba(cr, color->r, color->g, color->b, color->a);
+
+    cairo_scale(cr, 1.0, -1.0);
+    cairo_move_to(cr, x, -y);
+    cairo_show_text(cr, str);
+    cairo_scale(cr, 1.0, -1.0);
 }
 
 // draws both the hp meters
@@ -218,6 +301,13 @@ void drawhpmeter(cairo_t *cr, struct colorset *colors, double hpratio,
 
 }
 
+// blits and draws pixels to the screen
+void drawtoscreen(SDL_Surface *screen, SDL_Surface *sdlbuff)
+{
+    SDL_BlitSurface(sdlbuff, NULL, screen, NULL);
+    SDL_Flip(screen);
+}
+
 // erases the surface used by cairo
 void cairoerase(cairo_t * cr)
 {
@@ -255,6 +345,7 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
     cairo_translate(*cr, -0.5, -0.5);	// align to pixel center
     cairo_scale(*cr, SCALEF, -SCALEF);	// scale + flip image over x axis
     cairo_translate(*cr, 0, -YMAX);	// shift image vertically
+    cairo_set_font_size(*cr, FONTSIZE / (double) SCALEF);
 
 }
 
