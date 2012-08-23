@@ -165,10 +165,10 @@ void drawfps(cairo_t * cr, long simtime)
 	sprintf(s, "Framerate: %3d fps", fps);
 	//   cairo_text_extents(cr, s, &te);
 	cairo_scale(cr, 1.0, -1.0);
-	cairo_move_to(cr, 3, -114 + HPBUF);
+	cairo_move_to(cr, 3, -YMAX + HPBUF + 6);
 	cairo_show_text(cr, s);
 	sprintf(s, "Simulation rate: %1.2lfx", simrate);
-	cairo_move_to(cr, 3, -110 + HPBUF);
+	cairo_move_to(cr, 3, -YMAX + HPBUF + 10);
 	cairo_show_text(cr, s);
 	cairo_scale(cr, 1.0, -1.0);
     }
@@ -197,7 +197,7 @@ void drawhpmeter(cairo_t *cr, struct colorset *colors, double hpratio,
     if (hpratio < 0)
 	hpratio = 0;
 
-    xmid = ((double) XMAX - XMIN) / 2;
+    xmid = ((double) XMAX) / 2;
     xpos = xmid + hpratio * (xmid - 2) * direction;
 
     cairo_move_to(cr, xmid, YMAX - 1);
@@ -254,7 +254,7 @@ void graphicsinit(SDL_Surface ** screen, SDL_Surface ** sdlbuff,
 
     cairo_translate(*cr, -0.5, -0.5);	// align to pixel center
     cairo_scale(*cr, SCALEF, -SCALEF);	// scale + flip image over x axis
-    cairo_translate(*cr, XMIN, -YMAX);	// shift image vertically
+    cairo_translate(*cr, 0, -YMAX);	// shift image vertically
 
 }
 

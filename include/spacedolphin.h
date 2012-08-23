@@ -116,10 +116,8 @@ struct objnode {
 #define RDSQ	     10.0	// squared distance from BH to apply rep. force
 #define REPFS	    400.0	// scaled strength of replellant force
 
-#define XMAX        160.0	// the higher width coordinate of the space
-#define XMIN          0.0	// the lower width coord ...
-#define YMAX        120.0	// the higher height coord ...
-#define YMIN          0.0	// the lower height coord ...
+#define XMAX        160.0	// the width of the space
+#define YMAX        120.0	// the height of the space
 #define XYBUF         5.0	// border not to put rand objects in
 #define HPBUF	      4.0	// space to give for the hp meters
 

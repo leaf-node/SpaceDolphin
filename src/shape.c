@@ -67,15 +67,13 @@ cpSpace *makeshapes(struct objnode *objroot)
     objx = objroot;
 
 /* boundaries for the game... */
-    objx = makeline(objx, space, true, cpv(XMIN, YMIN + 1),
-		    cpv(XMAX, YMIN + 1));
-    objx = makeline(objx, space, true, cpv(XMIN, YMAX - 1 - HPBUF),
-		    cpv(XMAX, YMAX - 1 - HPBUF));
+    objx = makeline(objx, space, true, cpv(0, 1), cpv(XMAX, 1));
+    objx = makeline(objx, space, true, cpv(1, 0), cpv(1, YMAX));
 
-    objx = makeline(objx, space, true, cpv(XMIN + 1, YMAX),
-		    cpv(XMIN + 1, YMIN));
     objx = makeline(objx, space, true, cpv(XMAX - 1, YMAX),
-		    cpv(XMAX - 1, YMIN));
+		    cpv(XMAX - 1, 0));
+    objx = makeline(objx, space, true, cpv(0, YMAX - 1 - HPBUF),
+		    cpv(XMAX, YMAX - 1 - HPBUF));
 
     // needed before random intial velocities, placement and rotation
     time = curtime();
@@ -333,7 +331,7 @@ cpVect randfit(struct objnode *objlast, cpFloat r)
     cpVect xymin, xymax;
     cpVect randv;
 
-    xymin = cpv(XMIN + XYBUF, YMIN + XYBUF);
+    xymin = cpv(XYBUF, XYBUF);
     xymax = cpv(XMAX - XYBUF, YMAX - XYBUF - HPBUF);
 
     for (i = 0; i < 1000; i++) {
