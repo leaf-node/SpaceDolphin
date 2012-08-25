@@ -1,9 +1,9 @@
-This is the source code to Chipmunk Physics v 6.0.3, but with the Demos
+This is the source code to Chipmunk Physics v 6.1.1, but with the Demos
 removed. I've also changed the CMakeLists.txt files to contain only what is
 necessary to build this particular project.
 
 If you want to play with demos, or want to build the dynamic library, visit the
-program's web page:
+program's home page:
 
 http://chipmunk-physics.net/
 
