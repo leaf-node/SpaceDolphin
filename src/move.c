@@ -131,15 +131,15 @@ bool interact(cpSpace * space, struct objnode *objroot,
 void blastengines(struct objnode *player)
 {
     struct movement *thrust;
-    cpFloat force = 0, tforce = 0;
+    cpFloat force, tforce;
     struct forces newf;
-    cpVect rotv = cpBodyGetRot(player->b);
+    cpVect rotv;
     cpFloat angvel;
-    long dt;
-    struct timespec now;
 
     thrust = &player->pinfo->thrust;
+    rotv = cpBodyGetRot(player->b);
 
+    force = 0;
     // these test cases are to enforce soft limits on the rate of movement
     if (thrust->up && !thrust->down) {
 	if (cpvunrotate(cpBodyGetVel(player->b), rotv).y < MAXVEL)
@@ -149,33 +149,14 @@ void blastengines(struct objnode *player)
 	    force = -FORCE;
     }
 
-    now = curtime();
-    dt = convtns(tdiff(now, thrust->markt));
-    thrust->markt = now;
-
     tforce = 0;
     angvel = cpBodyGetAngVel(player->b);
-    if (thrust->ccw) {
-	thrust->ccwt += dt;
-	thrust->ccwt =
-	    (thrust->ccwt > TORQRAMPT) ? TORQRAMPT : thrust->ccwt;
-
+    if (thrust->ccw && !thrust->cw) {
 	if (angvel < MAXANGVEL)
-	    tforce += TFORCE * sqrtl(thrust->ccwt / TORQRAMPT);
-    } else if (thrust->ccwt > 0) {
-	thrust->ccwt -= dt;
-	thrust->ccwt = (thrust->ccwt < 0) ? 0 : thrust->ccwt;
-    }
-
-    if (thrust->cw) {
-	thrust->cwt += dt;
-	thrust->cwt = (thrust->cwt > TORQRAMPT) ? TORQRAMPT : thrust->cwt;
-
+	    tforce += TFORCE;
+    } else if (thrust->cw && !thrust->ccw) {
 	if (angvel > -MAXANGVEL)
-	    tforce += -TFORCE * sqrtl(thrust->cwt / TORQRAMPT);
-    } else if (thrust->cwt > 0) {
-	thrust->cwt -= dt;
-	thrust->cwt = (thrust->cwt < 0) ? 0 : thrust->cwt;
+	    tforce += -TFORCE;
     }
 
     newf.force = cpvrotate(cpv(0, force), rotv);

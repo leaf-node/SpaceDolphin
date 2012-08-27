@@ -432,17 +432,13 @@ void initplayer(struct objnode *player)
 
     player->pinfo->thrust.prevf.force = cpvzero;
     player->pinfo->thrust.prevf.tforce = cpvzero;
-    player->pinfo->thrust.markt.tv_sec = 0;
-    player->pinfo->thrust.markt.tv_nsec = 0;
 
     player->pinfo->thrust.up = false;
     player->pinfo->thrust.down = false;
     player->pinfo->thrust.left = false;
     player->pinfo->thrust.right = false;
     player->pinfo->thrust.cw = false;
-    player->pinfo->thrust.cwt = 0;
     player->pinfo->thrust.ccw = false;
-    player->pinfo->thrust.ccwt = 0;
 
 }
 

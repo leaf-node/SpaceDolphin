@@ -58,11 +58,8 @@ struct movement {
     bool left;
     bool right;
     bool cw;
-    cpFloat cwt;
     bool ccw;
-    cpFloat ccwt;
     struct forces prevf;
-    struct timespec markt;
 };
 
 // basic player information
@@ -104,7 +101,7 @@ struct objnode {
 #define NITER    MAXFPS		// n of frames to average, to calc actual fps
 
 #define FORCE       200.0	// force of rocket's jetpack
-#define TFORCE      200.0	// proportional to torque of rocket
+#define TFORCE       75.0	// proportional to torque of rocket
 #define RLEN          4.0	// length of radius at which TFORCE is applied
 #define MAXVEL	    200.0	// soft limit for velocity
 #define MAXANGVEL     8.0	// soft limit for angular velocity
