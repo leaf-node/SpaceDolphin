@@ -85,7 +85,7 @@ struct objnode {
     struct objnode *next;
 };
 
-#define HPSTART		7	// the hitpoints players start with
+#define HPSTART	       16	// the hitpoints players start with
 #define SHORTTIME     0.1	// max sec between collisions to be "continuous"
 
 #define DEBUG	    false	// print info about graphics mode
