@@ -23,8 +23,8 @@ struct objnode objroot[1] = {
 };
 
 bool someonelost(struct objnode *objroot);
-void cleanup(SDL_Surface * sdlbuf, cairo_surface_t * surface, struct objnode
-	     *objroot, cpSpace * space);
+void cleanup(SDL_Surface * sdlbuff, cairo_t *cr, cairo_surface_t * surface,
+	     struct objnode *objroot, cpSpace * space);
 
 int main(void)
 {
@@ -64,7 +64,7 @@ int main(void)
 	}
     }
 
-    cleanup(sdlbuff, surface, objroot, space);
+    cleanup(sdlbuff, cr, surface, objroot, space);
 
     return 0;
 }
@@ -89,10 +89,11 @@ bool someonelost(struct objnode *objroot)
 }
 
 // free up some memory
-void cleanup(SDL_Surface * sdlbuff, cairo_surface_t * surface, struct objnode
-	     *objroot, cpSpace * space)
+void cleanup(SDL_Surface * sdlbuff, cairo_t *cr, cairo_surface_t * surface,
+	     struct objnode *objroot, cpSpace * space)
 {
     SDL_FreeSurface(sdlbuff);
+    cairo_destroy(cr);
     cairo_surface_destroy(surface);
     rmobjs(objroot);
     cpSpaceFree(space);
