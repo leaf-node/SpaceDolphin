@@ -18,7 +18,7 @@ different in newer or older systems.)
 Next, you need to grab the source code, if you haven't downloaded it yet. (The
 clone only needs to be done once):
 
-    git clone https://git.gitorious.org/spacedolphin/spacedolphin.git
+    git clone https://gitlab.com/spacedolphin/spacedolphin.git
 
     cd spacedolphin
 
