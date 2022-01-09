@@ -3,8 +3,6 @@ SpaceDolphin
 This is a simple 2D game released under GPLv3+. It uses the Chipmunk Physics
 engine, which is also free software. (meaning these respect your freedom.)
 
-    http://sudoman.ninth.su/spacedolphin
-
 
 See the INSTALL file for installation instructions.
 
